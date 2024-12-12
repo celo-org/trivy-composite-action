@@ -38,7 +38,7 @@ runs:
             const securityEnabled = response.data.security_and_analysis?.advanced_security?.status === 'enabled';
  
             if (!securityEnabled) {
-              const message = 'GitHub Advanced Security is NOT enabled and repo set to private.';
+              const message = 'GitHub Advanced Security is NOT enabled and repo is private. Can not upload report';
               core.setFailed(message);
             }
           }
