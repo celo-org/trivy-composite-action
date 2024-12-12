@@ -40,8 +40,8 @@ runs:
             if (!securityEnabled) {
               const message = 'GitHub Advanced Security is NOT enabled and repo is private. Can not upload report';
               core.warning(message);
+              process.exit(1);
             }
-            return securityEnabled;
           }
     - name: Run Trivy vulnerability scanner
       id: scan
