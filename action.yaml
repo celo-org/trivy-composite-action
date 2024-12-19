@@ -96,14 +96,14 @@ runs:
       with:
         sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
 
-    - name: Convert output to text for github summary
-      id: convert-text
-      env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
-      shell: bash
-      run: |
-        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
-        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
+#    - name: Convert output to text for github summary
+#      id: convert-text
+#      env:
+#        OUTPUT-FILE: ${{ inputs.output-file }}
+#      shell: bash
+#      run: |
+#        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
+#        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
 
     - name: Publish Trivy Output to Summary
       shell: bash
