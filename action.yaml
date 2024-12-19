@@ -106,6 +106,6 @@ runs:
         echo '```'
         echo "</details>"
       } >> $GITHUB_STEP_SUMMARY
-    fi
+      fi
  
 
