@@ -102,7 +102,7 @@ runs:
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo '```Scan results'
-          cat ${{ inputs.output-file }}.txt
+          cat "${{ inputs.output-file }}.txt"
           echo '```'
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
