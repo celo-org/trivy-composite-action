@@ -33,8 +33,11 @@ runs:
 
     - name: Validate Inputs
       shell: bash
+      env:
+        SCAN_TYPE: ${{ inputs.scan-type }}
+        IMAGE_REF: ${{ inputs.image-ref }}
       run: |
-        if [[ ${{ inputs.scan-type }} == "image" && ${{ inputs.image-ref }} == '' ]]; then
+        if [[ ${{ env.SCAN_TYPE }} == "image" && ${{ env.IMAGE_REF }} == '' ]]; then
         {
           echo "::error::scan-type of image requires image-ref"
           exit 1
@@ -78,31 +81,42 @@ runs:
 
     - name: Convert output to Sarif for codescanning
       if: steps.ghas-enabled.output.result
+      id: convert-sarif
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       shell: bash
-      run: trivy convert --format sarif --output "${{ inputs.output-file }}.sarif" trivy.json  
+      run: |
+        trivy convert --format sarif --output "${{ env.OUTPUT-FILE }}.sarif" trivy.json  
+        echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUTS
     
     - name: Upload Trivy scan results to GitHub Security tab
       if: steps.ghas-enabled.output.result
       id: upload
+      env:
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: "${{ inputs.output-file }}.sarif"
+        sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
 
     - name: Convert output to txt for github summary
+      id: convert-txt
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       shell: bash
-      run: trivy convert --format table  --output "${{ inputs.output-file }}.txt" trivy.json  
-
+      run: |
+        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json  
+        echo "txt-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
+       
 
     - name: Publish Trivy Output to Summary
       shell: bash
       run: |
-        if [[ -s "${{ inputs.output-file}}.txt" ]]; then
+        if [[ -s "${{ steps.convert-txt.outputs.txt-file }}" ]]; then
         {
           echo "### Security Output"
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo '```Scan results'
-          cat "${{ inputs.output-file }}.txt"
+          cat "${{ steps.convert-txt.outputs.txt-file }}"
           echo '```'
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
