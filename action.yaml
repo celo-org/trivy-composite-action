@@ -96,7 +96,7 @@ runs:
     - name: Publish Trivy Output to Summary
       shell: bash
       run: |
-        if [[ -s trivy.txt ]]; then
+        if [[ -s "${{ inputs.output-file}}.txt" ]]; then
         {
           echo "### Security Output"
           echo "<details><summary>Click to expand</summary>"
