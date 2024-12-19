@@ -86,7 +86,7 @@ runs:
         OUTPUT-FILE: ${{ inputs.output-file }}
       shell: bash
       run: |
-        trivy convert --format sarif --output "${{ env.OUTPUT-FILE }}.sarif" trivy.json  
+        trivy convert --format sarif --output "${{ env.OUTPUT-FILE }}.sarif" trivy.json
         echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUTS
     
     - name: Upload Trivy scan results to GitHub Security tab
@@ -96,26 +96,25 @@ runs:
       with:
         sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
 
-    - name: Convert output to txt for github summary
-      id: convert-txt
+    - name: Convert output to text for github summary
+      id: convert-text
       env:
         OUTPUT-FILE: ${{ inputs.output-file }}
       shell: bash
       run: |
-        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json  
-        echo "txt-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
-       
+        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
+        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
 
     - name: Publish Trivy Output to Summary
       shell: bash
       run: |
-        if [[ -s "${{ steps.convert-txt.outputs.txt-file }}" ]]; then
+        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
           echo "### Security Output"
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo '```Scan results'
-          cat "${{ steps.convert-txt.outputs.txt-file }}"
+          cat "${{ steps.convert-text.outputs.text-file }}"
           echo '```'
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
