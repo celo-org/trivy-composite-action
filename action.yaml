@@ -104,18 +104,18 @@ runs:
 #      run: |
 #        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
 #        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
-
-    - name: Publish Trivy Output to Summary
-      shell: bash
-      run: |
-        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-        {
-          echo "### Security Output"
-          echo "<details><summary>Click to expand</summary>"
-          echo ""
-          echo '```Scan results'
-          cat "${{ steps.convert-text.outputs.text-file }}"
-          echo '```'
-          echo "</details>"
-        } >> $GITHUB_STEP_SUMMARY
-        fi
+#
+#    - name: Publish Trivy Output to Summary
+#      shell: bash
+#      run: |
+#        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
+#        {
+#          echo "### Security Output"
+#          echo "<details><summary>Click to expand</summary>"
+#          echo ""
+#          echo '```Scan results'
+#          cat "${{ steps.convert-text.outputs.text-file }}"
+#          echo '```'
+#          echo "</details>"
+#        } >> $GITHUB_STEP_SUMMARY
+#        fi
