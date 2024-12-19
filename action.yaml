@@ -79,43 +79,43 @@ runs:
         format: "json"
         output: "trivy.json"
 
-#    - name: Convert output to Sarif for codescanning
-#      if: steps.ghas-enabled.output.result
-#      id: convert-sarif
-#      env:
-#        OUTPUT-FILE: ${{ inputs.output-file }}
-#      shell: bash
-#      run: |
-#        trivy convert --format sarif --output "${{ env.OUTPUT-FILE }}.sarif" trivy.json
-#        echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUTS
-#    
-#    - name: Upload Trivy scan results to GitHub Security tab
-#      if: steps.ghas-enabled.output.result
-#      id: upload
-#      uses: github/codeql-action/upload-sarif@v3
-#      with:
-#        sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
-#
-#    - name: Convert output to text for github summary
-#      id: convert-text
-#      env:
-#        OUTPUT-FILE: ${{ inputs.output-file }}
-#      shell: bash
-#      run: |
-#        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
-#        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUTS
-#
-#    - name: Publish Trivy Output to Summary
-#      shell: bash
-#      run: |
-#        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-#        {
-#          echo "### Security Output"
-#          echo "<details><summary>Click to expand</summary>"
-#          echo ""
-#          echo '```Scan results'
-#          cat "${{ steps.convert-text.outputs.text-file }}"
-#          echo '```'
-#          echo "</details>"
-#        } >> $GITHUB_STEP_SUMMARY
-#        fi
+    - name: Convert output to Sarif for codescanning
+      if: steps.ghas-enabled.output.result
+      id: convert-sarif
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
+      shell: bash
+      run: |
+        trivy convert --format sarif --output "${{ env.OUTPUT-FILE }}.sarif" trivy.json
+        echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      if: steps.ghas-enabled.output.result
+      id: upload
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
+
+    - name: Convert output to text for github summary
+      id: convert-text
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
+      shell: bash
+      run: |
+        trivy convert --format table  --output "${{ env.OUTPUT-FILE }}.txt" trivy.json
+        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
+
+    - name: Publish Trivy Output to Summary
+      shell: bash
+      run: |
+        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
+        {
+          echo "### Security Output"
+          echo "<details><summary>Click to expand</summary>"
+          echo ""
+          echo '```Scan results'
+          cat "${{ steps.convert-text.outputs.text-file }}"
+          echo '```'
+          echo "</details>"
+        } >> $GITHUB_STEP_SUMMARY
+        fi
