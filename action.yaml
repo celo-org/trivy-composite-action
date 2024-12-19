@@ -94,8 +94,8 @@ runs:
 
 
     - name: Publish Trivy Output to Summary
-      run: |
       shell: bash
+      run: |
       if [[ -s trivy.txt ]]; then
       {
         echo "### Security Output"
