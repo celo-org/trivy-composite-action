@@ -34,9 +34,11 @@ runs:
     - name: Validate Inputs
       shell: bash
       run: |
-        if [ ${{ inputs.scan-type}} == "image" && ${{ inputs.image-ref == ''}} ]; then
+        if [[ ${{ inputs.scan-type}} == "image" && ${{ inputs.image-ref == ''}} ]]; then
+        {
           echo "::error::scan-type of image requires image-ref"
           exit(1)
+        }
         fi
 
     - name: Check if GHAS is enabled
