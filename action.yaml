@@ -32,6 +32,7 @@ runs:
   steps:
 
     - name: Validate Inputs
+      shell: bash
       run: |
         if [ ${{ inputs.scan-type}} == "image" && ${{ inputs.image-ref == ''}} ]; then
           echo "::error::scan-type of image requires image-ref"
@@ -76,7 +77,7 @@ runs:
     - name: Convert output to Sarif for codescanning
       if: steps.ghas-enabled.output.result
       shell: bash
-      run: trivy convert --format sarif --output "${{ inputs.output-file }}.sarif" .json  
+      run: trivy convert --format sarif --output "${{ inputs.output-file }}.sarif" trivy.json  
     
     - name: Upload Trivy scan results to GitHub Security tab
       if: steps.ghas-enabled.output.result
@@ -87,7 +88,7 @@ runs:
 
     - name: Convert output to txt for github summary
       shell: bash
-      run: trivy convert --format table  --output "${{ inputs.output-file }}.txt" .json  
+      run: trivy convert --format table  --output "${{ inputs.output-file }}.txt" trivy.json  
 
 
     - name: Publish Trivy Output to Summary
