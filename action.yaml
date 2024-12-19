@@ -74,7 +74,7 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-	output: "trivy.json"
+        output: "trivy.json"
 
     - name: Convert output to Sarif for codescanning
       if: steps.ghas-enabled.output.result
