@@ -92,7 +92,6 @@ runs:
     - name: Upload Trivy scan results to GitHub Security tab
       if: steps.ghas-enabled.output.result
       id: upload
-      env:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: "${{ steps.convert-sarif.outputs.sarif-file }}
