@@ -126,5 +126,6 @@ runs:
         } >> $GITHUB_STEP_SUMMARY
         else
           echo "::error::Could not find trivy results. Check if container has OS information"
+          exit 1
         fi
 
