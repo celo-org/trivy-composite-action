@@ -90,10 +90,7 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-
         trivy-report="$(cat "${{ steps.convert-text.outputs.text-file }}")
-
-
         messageHeading="## Trivy Scan Results for ${{ env.APP }}"
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
@@ -107,7 +104,7 @@ EOF
 ```
 </details>
 EOF
-)
+          )
         }  
         else 
         {
@@ -115,7 +112,6 @@ EOF
         }
         fi
         message=$(printf "%s %s %s", messageHeading, messageBody)
-        
         echo "report=message" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
