@@ -28,6 +28,9 @@ inputs:
   output-file:
     description: "outputfile, this is used mostly as a run level variable since not supported in composite actions"
     default: "trivy"
+  summary:
+    description: "enable summary output"
+    default: true
 
 runs:
   using: "composite"
@@ -72,6 +75,7 @@ runs:
         fi  
 
     - name: Convert output to text for github summary
+      if: {{ inputs.summary == true }}
       env:
         OUTPUT-FILE: "${{ inputs.output-file }}.json"
       id: convert-text
@@ -81,6 +85,7 @@ runs:
         echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
 
     - name: Publish Trivy Output to Summary
+      if: {{ inputs.summary == true }}
       shell: bash
       env:
         APP: ${{ inputs.app }}
