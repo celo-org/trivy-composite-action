@@ -82,7 +82,7 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-        output: ${{ env.OUTPUT-FILE }}.json"
+        output: "${{ env.OUTPUT-FILE }}.json"
 
     - name: Check if trivy output scan exists
       shell: bash
