@@ -90,9 +90,9 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        echo "## Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
+          "## Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo "```Scan results"
@@ -100,8 +100,11 @@ runs:
           echo "```"
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
-        else
-          echo "No issues found" >> $GITHUB_STEP_SUMMARY
+        else 
+        {
+          "## Trivy Scan Results for ${{ env.APP }}"
+          echo "No issues found"
+        } >> $GITHUB_STEP_SUMMARY
         fi
 
     - name: Check if GHAS is enabled
