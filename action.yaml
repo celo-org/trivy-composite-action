@@ -49,7 +49,7 @@ runs:
     - name: Run Trivy vulnerability scanner
       id: scan
       env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
+        OUTPUT-FILE: "${{ inputs.output-file }}.json"
       uses: aquasecurity/trivy-action@master
       with:         
         scan-type: "${{ inputs.scan-type }}"
@@ -58,26 +58,26 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-        output: "${{ env.OUTPUT-FILE }}.json"
+        output: "${{ env.OUTPUT-FILE }}"
 
     - name: Check if trivy output scan exists
       shell: bash
       env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
+        OUTPUT-FILE: "${{ inputs.output-file }}.json"
       run: |
         jq -f ${{ env.OUTPUT-FILE }} '.Results[]'
-        if [ ! -s "${{ env.OUTPUT-FILE }}.json" !! jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
+        if [ ! -s "${{ env.OUTPUT-FILE }}" !! jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
           echo "::error::Could not find trivy results, scan failed"
           exit 1
         fi  
 
     - name: Convert output to text for github summary
       env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
+        OUTPUT-FILE: "${{ inputs.output-file }}.json"
       id: convert-text
       shell: bash
       run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
+        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}
         echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
 
     - name: Publish Trivy Output to Summary
@@ -128,7 +128,7 @@ runs:
       id: convert-sarif
       shell: bash
       run: |
-        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif trivy.json
+        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.OUTPUT-FILE }}.json
         echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
     
     - name: Upload Trivy scan results to GitHub Security tab
