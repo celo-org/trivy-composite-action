@@ -27,7 +27,7 @@ inputs:
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
   output-file:
-    description: "outputfile, this is used mostly as a run level variable since not supported in composite actions
+    description: "outputfile, this is used mostly as a run level variable since not supported in composite actions"
     default: "trivy"
 
 runs:
