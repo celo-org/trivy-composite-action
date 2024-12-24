@@ -68,7 +68,7 @@ runs:
       env:
         OUTPUT-FILE: "${{ inputs.output-file }}.json"
       run: |
-        jq -f ${{ env.OUTPUT-FILE }} '.Results[]'
+        jq '.Results[]' ${{ env.OUTPUT-FILE }} 
         if [ ! -s "${{ env.OUTPUT-FILE }}" !! jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
           echo "::error::Could not find trivy results, scan failed"
           exit 1
