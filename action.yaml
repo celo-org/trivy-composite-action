@@ -1,5 +1,4 @@
 name: Trivy
-
 description: "Run a Trivy Scan and upload the results"
 inputs:
   app:
@@ -136,8 +135,6 @@ runs:
           echo "```"
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
-        elif [[ jq '.Results[]' != null && jq '.Results[].Vulnerabilities' == null ]]; then 
-        {
+        elif [ jq '.Results[]' != null && jq '.Results[].Vulnerabilities' == null ]; then 
           echo "No issues found"
-        }
         fi
