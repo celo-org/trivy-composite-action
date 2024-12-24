@@ -90,7 +90,7 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        "## Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
+        echo "## Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
           echo "<details><summary>Click to expand</summary>"
