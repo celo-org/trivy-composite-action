@@ -77,11 +77,11 @@ runs:
     - name: Convert output to text for github summary
       if: inputs.summary
       env:
-        OUTPUT-FILE: "${{ inputs.output-file }}.json"
+        OUTPUT-FILE: "${{ inputs.output-file }}"
       id: convert-text
       shell: bash
       run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}
+        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
         echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
 
     - name: Publish Trivy Output to Summary
