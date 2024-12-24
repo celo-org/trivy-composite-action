@@ -90,11 +90,11 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        message="## Trivy Scan Results for ${{ env.APP }}\n"
+        message="## Trivy Scan3 Results for ${{ env.APP }}\n"
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
           message+="<details><summary>Click to expand</summary>"
-          message+="```Scan results"
+          message+="```Scan2 results"
           message+=$(cat "${{ steps.convert-text.outputs.text-file }}")
           message+="```"
           message+="</details>"
@@ -112,7 +112,7 @@ runs:
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
-        message-id: Trivy Scan ${{ github.workflow }}
+        message-id: Trivy Scan1 ${{ github.workflow }}
         message: |
           Trivy scan for ${{ github.workflow }}
 
