@@ -46,6 +46,59 @@ runs:
         }
         fi
 
+    - name: Run Trivy vulnerability scanner
+      id: scan
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
+      uses: aquasecurity/trivy-action@master
+      with:         
+        scan-type: "${{ inputs.scan-type }}"
+        image-ref: "${{ inputs.image-ref }}"
+        timeout: "${{ inputs.timeout }}"
+        vuln-type: "${{ inputs.vuln-type }}"
+        severity: "${{ inputs.severity }}"
+        format: "json"
+        output: "${{ env.OUTPUT-FILE }}.json"
+
+    - name: Check if trivy output scan exists
+      shell: bash
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
+      run: |
+        jq -f ${{ env.OUTPUT-FILE }} '.Results[]'
+        if [ ! -s "${{ env.OUTPUT-FILE }}.json" !! jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
+          echo "::error::Could not find trivy results, scan failed"
+          exit 1
+        fi  
+
+    - name: Convert output to text for github summary
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
+      id: convert-text
+      shell: bash
+      run: |
+        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
+        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
+
+    - name: Publish Trivy Output to Summary
+      shell: bash
+      env:
+        APP: ${{ inputs.app }}
+      run: |
+        echo "## Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
+        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
+        {
+          echo "<details><summary>Click to expand</summary>"
+          echo ""
+          echo "```Scan results"
+          cat "${{ steps.convert-text.outputs.text-file }}"
+          echo "```"
+          echo "</details>"
+        } >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No issues found" >> $GITHUB_STEP_SUMMARY
+        fi
+
     - name: Check if GHAS is enabled
       uses: actions/github-script@v7
       id: ghas-enabled
@@ -68,31 +121,6 @@ runs:
           }
           return true
 
-
-    - name: Run Trivy vulnerability scanner
-      id: scan
-      env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
-      uses: aquasecurity/trivy-action@master
-      with:         
-        scan-type: "${{ inputs.scan-type }}"
-        image-ref: "${{ inputs.image-ref }}"
-        timeout: "${{ inputs.timeout }}"
-        vuln-type: "${{ inputs.vuln-type }}"
-        severity: "${{ inputs.severity }}"
-        format: "json"
-        output: "${{ env.OUTPUT-FILE }}.json"
-
-    - name: Check if trivy output scan exists
-      shell: bash
-      env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
-      run: |
-        if [ ! -s "${{ env.OUTPUT-FILE }}.json" ]; then
-          echo "::error::Could not find trivy results, scan failed"
-          exit 1
-        fi  
-
     - name: Convert output to Sarif for codescanning
       env:
         OUTPUT-FILE: ${{ inputs.output-file }}
@@ -110,30 +138,3 @@ runs:
       with:
         sarif_file: ${{ steps.convert-sarif.outputs.sarif-file }}
 
-    - name: Convert output to text for github summary
-      env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
-      id: convert-text
-      shell: bash
-      run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
-        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
-
-    - name: Publish Trivy Output to Summary
-      shell: bash
-      env:
-        APP: ${{ inputs.app }}
-      run: |
-        echo "### Trivy Scan Results for ${{ env.APP }}" >> $GITHUB_STEP_SUMMARY
-        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-        {
-          echo "<details><summary>Click to expand</summary>"
-          echo ""
-          echo "```Scan results"
-          cat "${{ steps.convert-text.outputs.text-file }}"
-          echo "```"
-          echo "</details>"
-        } >> $GITHUB_STEP_SUMMARY
-        elif [ jq '.Results[]' != null && jq '.Results[].Vulnerabilities' == null ]; then 
-          echo "No issues found"
-        fi
