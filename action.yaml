@@ -89,7 +89,6 @@ runs:
         OUTPUT-FILE: ${{ inputs.output-file }}
       run: |
         if [ ! -s "${{ env.OUTPUT-FILE }}.json" ]; then
-        {
           echo "::error::Could not find trivy results, scan failed"
           exit 1
         fi  
