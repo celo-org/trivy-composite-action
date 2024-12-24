@@ -90,7 +90,7 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        trivy-report="$(cat "${{ steps.convert-text.outputs.text-file }}")
+        trivy-report="$(cat ${{ steps.convert-text.outputs.text-file }})"
         messageHeading="## Trivy Scan Results for ${{ env.APP }}"
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
