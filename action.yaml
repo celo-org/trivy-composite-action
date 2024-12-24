@@ -85,6 +85,7 @@ runs:
         output: ${{ env.OUTPUT-FILE }}.json"
 
     - name: Check if trivy output scan exists
+      shell: bash
       env:
         OUTPUT-FILE: ${{ inputs.output-file }}
       run: |
