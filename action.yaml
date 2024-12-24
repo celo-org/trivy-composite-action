@@ -26,11 +26,12 @@ inputs:
     description: "severity of issues to report"
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
+  output-file:
+    description: "outputfile, this is used mostly as a run level variable since not supported in composite actions
+    default: "trivy"
 
 runs:
   using: "composite"
-  env:
-    OUTPUT-FILE: "trivy"
   steps:
 
     - name: Validate Inputs
@@ -71,6 +72,8 @@ runs:
 
     - name: Run Trivy vulnerability scanner
       id: scan
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       uses: aquasecurity/trivy-action@master
       with:         
         scan-type: "${{ inputs.scan-type }}"
@@ -82,6 +85,8 @@ runs:
         output: ${{ env.OUTPUT-FILE }}.json"
 
     - name: Check if trivy output scan exists
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       run: |
         if [ ! -s "${{ env.OUTPUT-FILE }}.json" ]; then
         {
@@ -90,6 +95,8 @@ runs:
         fi  
 
     - name: Convert output to Sarif for codescanning
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       if: steps.ghas-enabled.output.result
       id: convert-sarif
       shell: bash
@@ -105,10 +112,12 @@ runs:
         sarif_file: ${{ steps.convert-sarif.outputs.sarif-file }}
 
     - name: Convert output to text for github summary
+      env:
+        OUTPUT-FILE: ${{ inputs.output-file }}
       id: convert-text
       shell: bash
       run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.TRIVY_OUTPUT }}
+        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
         echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
 
     - name: Publish Trivy Output to Summary
