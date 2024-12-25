@@ -121,11 +121,14 @@ runs:
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
 
-        IFS='' read -r -d '' MESSAGE <<-"EOF"
+        IFS='' read -r -d MESSAGE <<-"EOF"
         $HEADER
         $BODY
         EOF
         echo "report=$MESSAGE" >> $GITHUB_OUTPUT
+
+
+
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
