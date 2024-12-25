@@ -120,7 +120,7 @@ runs:
         fi
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
-        MESSAGE="Header is $HEADER\Body is $BODY" 
+        MESSAGE="$HEADER\n$BODY" 
         echo "report=$MESSAGE" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
