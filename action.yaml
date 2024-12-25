@@ -94,11 +94,15 @@ runs:
         echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
-          echo 'BODY=<details><summary>Click to expand</summary>\n
-          ```Scan results\n
-          ${{ env.trivy-report }}\n
-          ```\n
-          </details>\n' >> $GITHUB_ENV
+          {
+            echo 'BODY=<<EOF'
+            echo '<details><summary>Click to expand</summary>\n'
+            echo '```Scan results\n'
+            echo '${{ env.trivy-report }}\n'
+            echo '```\n'
+            echo '</details>\n'
+            echo EOF
+          } >> "$GITHUB_ENV"
         }  
         else 
         {
