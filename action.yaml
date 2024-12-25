@@ -99,7 +99,7 @@ runs:
           echo "${{ env.trivy-report }}\n" >> $GITHUB_ENV
           echo '```\n' >> $GITHUB_ENV
           echo '</details>\n' >> $GITHUB_ENV
-          echo EOF > $GITHUB_ENV
+          echo "EOF" > $GITHUB_ENV
         else 
           echo "BODY='No issues found'" >> $GITHUB_ENV
         fi
