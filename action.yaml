@@ -114,13 +114,8 @@ runs:
         echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
         echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-          read -r -d '' BODY <<- EOM
-              This is line 1.
-              This is line 2.
-              Line 3.
-          EOM
-        else 
           BODY='No issues found'
+        else 
         fi
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
