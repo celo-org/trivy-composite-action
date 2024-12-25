@@ -69,7 +69,7 @@ runs:
         OUTPUT-FILE: "${{ inputs.output-file }}.json"
       run: |
         jq '.Results[]' ${{ env.OUTPUT-FILE }} 
-        if [ ! -s "${{ env.OUTPUT-FILE }}" !! jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
+        if [ ! -s "${{ env.OUTPUT-FILE }}" || jq -f ${{ env.OUTPUT-FILE }} '.Results[]' = "null" ]; then
           echo "::error::Could not find trivy results, scan failed"
           exit 1
         fi  
@@ -123,7 +123,8 @@ runs:
         else 
           echo "BODY='No issues found'" >> $GITHUB_ENV
         fi
-        MESSAGE=$(printf "%s\n%s", ${{ env.HEADER }}, ${{ env.BODY }})
+        echo "env is $GITHUB_ENV"
+        MESSAGE=$(printf "%s\n%s", $HEADER, $BODY)
         echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
