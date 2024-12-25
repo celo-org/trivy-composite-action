@@ -116,6 +116,7 @@ runs:
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
           BODY='No issues found'
         else 
+          BODY='No issues found'
         fi
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
