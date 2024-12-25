@@ -95,11 +95,11 @@ runs:
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
-          BODY="<details><summary>Click to expand</summary>\n
+          BODY='<details><summary>Click to expand</summary>\n
           ```Scan results\n
           ${{ env.trivy-report }}\n
           ```\n
-          </details>"
+          </details>\n'
         }  
         else 
         {
