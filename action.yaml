@@ -120,7 +120,7 @@ runs:
         fi
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
-        MESSAGE=$(printf "Header is %s\nBody is %s", "$HEADER", "$BODY")
+        MESSAGE="Header is $HEAD\Body is $BODY" 
         echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
