@@ -90,8 +90,8 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        echo trivy-report="$(cat ${{ steps.convert-text.outputs.text-file }})" >> GITHUB_ENV
-        echo messageHeading="## Trivy Scan Results for ${{ env.APP }}" >> GITHUB_ENV
+        echo "trivy-report=$(cat ${{ steps.convert-text.outputs.text-file }})" >> GITHUB_ENV
+        echo "messageHeading=## Trivy Scan Results for ${{ env.APP }}" >> GITHUB_ENV
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
