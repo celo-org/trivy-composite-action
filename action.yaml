@@ -95,23 +95,18 @@ runs:
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
-          messageBody=$(cat <<EOF
-<details><summary>Click to expand</summary>
-```Scan results
-          EOF
-          echo $trivy-report
-          cat <<EOF
-```
-</details>
-          EOF
-          )
+          messageBody="<details><summary>Click to expand</summary>
+          ```Scan results
+          $trivy-report
+          ```
+          </details>"
         }  
         else 
         {
           messageBody="No issues found"
         }
         fi
-        message=$(printf "%s %s %s", messageHeading, messageBody)
+        message=$(printf "%s\n", messageHeading, messageBody)
         echo "report=message" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
