@@ -121,7 +121,7 @@ runs:
         echo "Header is $HEADER\n"
         echo "Body is $BODY\n" 
 
-        read -r -d '' MESSAGE << EOF
+        IFS='' read -r -d '' MESSAGE <<-"EOF"
         $HEADER
         $BODY
         EOF
