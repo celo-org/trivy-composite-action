@@ -123,7 +123,7 @@ runs:
           echo "BODY='No issues found'" >> $GITHUB_ENV
         fi
         echo "env is ${{ env.GITHUB_ENV }}"
-        printf "%s\n%s", "${{ env.HEADER }}", "${{ env.BODY }}"
+        printf "Header is %s\nBody is %s", "$HEADER", "$BODY"
         echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
