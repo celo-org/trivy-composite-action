@@ -111,8 +111,8 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
-        echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
+        echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }})
+          HEADER='## Trivy Scan Results for ${{ env.APP }}'
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
           BODY='No issues found'
         else 
