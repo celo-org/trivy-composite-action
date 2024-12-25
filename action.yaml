@@ -97,7 +97,7 @@ runs:
         {
           echo messageBody="<details><summary>Click to expand</summary>
           ```Scan results
-          ${{ $env.trivy-report }}
+          ${{ env.trivy-report }}
           ```
           </details>" >> $GITHUB_ENV
         }  
