@@ -124,7 +124,7 @@ runs:
           echo "BODY='No issues found'" >> $GITHUB_ENV
         fi
         echo "env is $GITHUB_ENV"
-        MESSAGE=$(printf "%s\n%s", $HEADER, $BODY)
+        MESSAGE=$(printf "%s\n%s", "$HEADER", "$BODY")
         echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
