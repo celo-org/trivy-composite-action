@@ -84,6 +84,28 @@ runs:
         trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
         echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
 
+#    - name: Create Trivy Report
+#      id: report
+#      shell: bash
+#      env:
+#        APP: ${{ inputs.app }}
+#      run: |
+#        echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
+#        echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
+#        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
+#          echo 'BODY=<<EOF' >> $GITHUB_ENV
+#          echo '<details><summary>Click to expand</summary>\n' >> $GITHUB_ENV
+#          echo '```Scan results\n' >> $GITHUB_ENV
+#          echo "${{ env.trivy-report }}\n" >> $GITHUB_ENV
+#          echo '```\n' >> $GITHUB_ENV
+#          echo '</details>\n' >> $GITHUB_ENV
+#          echo "EOF" > $GITHUB_ENV
+#        else 
+#          echo "BODY='No issues found'" >> $GITHUB_ENV
+#        fi
+#        MESSAGE=$(printf "%s\n%s", ${{ env.HEADER }}, ${{ env.BODY }})
+#        echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
+
     - name: Create Trivy Report
       id: report
       shell: bash
@@ -93,13 +115,11 @@ runs:
         echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
         echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-          echo 'BODY=<<EOF' >> $GITHUB_ENV
-          echo '<details><summary>Click to expand</summary>\n' >> $GITHUB_ENV
-          echo '```Scan results\n' >> $GITHUB_ENV
-          echo "${{ env.trivy-report }}\n" >> $GITHUB_ENV
-          echo '```\n' >> $GITHUB_ENV
-          echo '</details>\n' >> $GITHUB_ENV
-          echo "EOF" > $GITHUB_ENV
+        {
+          echo 'BODY<<EOF'
+          curl https://example.com
+          echo EOF
+        } >> "$GITHUB_ENV"
         else 
           echo "BODY='No issues found'" >> $GITHUB_ENV
         fi
