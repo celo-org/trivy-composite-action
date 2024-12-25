@@ -130,7 +130,7 @@ runs:
     - name: Post Scan Results to Workflow Summary
       if: ${{ inputs.summary }}
       shell: bash
-      run: echo ${{ steps.report.outputs.report }} >> $GITHUB_SUMMARY
+      run: echo "${{ steps.report.outputs.report }}" >> $GITHUB_SUMMARY
 
     - name: Check if GHAS is enabled
       uses: actions/github-script@v7
