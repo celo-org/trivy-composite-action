@@ -98,12 +98,12 @@ runs:
           messageBody=$(cat <<EOF
 <details><summary>Click to expand</summary>
 ```Scan results
-EOF
+          EOF
           echo $trivy-report
           cat <<EOF
 ```
 </details>
-EOF
+          EOF
           )
         }  
         else 
