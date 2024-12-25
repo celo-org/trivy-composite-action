@@ -114,16 +114,17 @@ runs:
         echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
         echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-        {
-          echo 'BODY<<EOF'
-          curl https://example.com
-          echo EOF
-        } >> "$GITHUB_ENV"
+          read -r -d '' BODY <<- EOM
+              This is line 1.
+              This is line 2.
+              Line 3.
+          EOM
         else 
-          echo "BODY='No issues found'" >> $GITHUB_ENV
+          BODY='No issues found'
         fi
-        echo "env is ${{ env.GITHUB_ENV }}"
-        printf "Header is %s\nBody is %s", "$HEADER", "$BODY"
+        echo "Header is $HEADER\n"
+        echo "Body is $BODY\n" 
+        MESSAGE=$(printf "Header is %s\nBody is %s", "$HEADER", "$BODY")
         echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
