@@ -96,7 +96,7 @@ runs:
         {
           {
             echo 'BODY=<<EOF'
-            echo '<details><summary>Click to expand</summary>\n'
+            echo "<details><summary>Click to expand</summary>\n"
             echo '```Scan results\n'
             echo '${{ env.trivy-report }}\n'
             echo '```\n'
