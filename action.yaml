@@ -90,23 +90,23 @@ runs:
       env:
         APP: ${{ inputs.app }}
       run: |
-        trivy-report="$(cat ${{ steps.convert-text.outputs.text-file }})"
-        messageHeading="## Trivy Scan Results for ${{ env.APP }}"
+        echo trivy-report="$(cat ${{ steps.convert-text.outputs.text-file }})" >> GITHUB_ENV
+        echo messageHeading="## Trivy Scan Results for ${{ env.APP }}" >> GITHUB_ENV
 
         if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
         {
-          messageBody="<details><summary>Click to expand</summary>
+          echo messageBody="<details><summary>Click to expand</summary>
           ```Scan results
-          $trivy-report
+          ${{ $env.trivy-report }}
           ```
-          </details>"
+          </details>" >> $GITHUB_ENV
         }  
         else 
         {
-          messageBody="No issues found"
+          echo messageBody="No issues found" >> $GITHUB_ENV
         }
         fi
-        message=$(printf "%s\n", messageHeading, messageBody)
+        echo message=$(printf "%s\n", ${{ env.messageHeading }}, ${{ env.messageBody }}) >> $GITHUB_ENV 
         echo "report=message" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
