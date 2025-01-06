@@ -92,29 +92,27 @@ runs:
         ACTOR: ${{ github.actor }}
         EVENT-NAME: ${{ github.event_name }}
         WORKFLOW: ${{ github.workflow }}
+        WORKDIR:  ${{ github.workdir }}
         REPO: ${{ github.repository }}
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
       run: |
-        if [[ -s ${{ env.TRIVY-TEXT-FILE }} ]]; then
         {
           echo "### Trivy Scan Output"
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo '```scan-type ${{ env.SCAN-TYPE }}'
           cat ${{ env.TRIVY-TEXT-FILE }}
+          echo "\n"
+          echo "*Pusher: @${{ env.ACTOR }}*\n"
+          echo "*Action: ${{ env.EVENT-NAME }}*\n"
+          echo "*Working Directory: ${{ env.WORKDIR }}*\n"
+          echo "*Workflow: ${{ env.WORKFLOW }}*\n"
+          echo "*Execution link: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }} *\n"
           echo '```'
           echo "</details>"
-
-          echo "*Pusher: @${{ env.ACTOR }}*"
-          echo "*Action: ${{ env.EVENT-NAME }}*"
-          echo "*Working Directory: ${{ env.WORKDIR }}*"
-          echo "*Workflow: ${{ env.WORKFLOW }}*"
-          echo "*Execution link: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }}*"
-
         } >> report.txt
         echo "report=report.txt" >> $GITHUB_OUTPUT     
-        fi
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
