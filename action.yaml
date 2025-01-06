@@ -109,7 +109,7 @@ runs:
           echo "*Pusher: @${{ env.ACTOR }}*"
           echo "*Action: ${{ env.EVENT-NAME }}*"
           echo "*Working Directory: ${{ env.WORKDIR }}*"
-          echo" *Workflow: ${{ env.WORKFLOW }}*"
+          echo "*Workflow: ${{ env.WORKFLOW }}*"
           echo "*Execution link: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }}*"
 
         } >> report.txt
