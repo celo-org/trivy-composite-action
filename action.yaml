@@ -107,7 +107,7 @@ runs:
           echo "*Pusher: @${{ env.ACTOR }}*"
           echo "*Action: ${{ env.EVENT-NAME }}*"
           echo "*Workflow: ${{ env.WORKFLOW }}*"
-          echo "*Execution link: [link] (https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }}) *"
+          echo "*Execution link: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }}*"
           echo '```'
           echo "</details>"
         } >> report.txt
@@ -121,38 +121,12 @@ runs:
         repo-token: ${{ github.token }}
         message-id: Trivy Scan ${{ github.workflow }}
         message-path: ${{ steps.build-report.outputs.report }}
-#        message: |
-#          Trivy scan for ${{ github.workflow }}
-#
-#          ${{ steps.convert-text.output.text-file }}
-#
-#          *Pusher: @${{ github.actor }}*
-#          *Action: ${{ github.event_name }}*
-#          *Working Directory: ${{ env.WORKDIR }}*
-#          *Workflow: ${{ github.workflow }}*
-#          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
-#
 
     - name: Post Scan Results to Workflow Summary
       if: ${{ inputs.summary }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
-#      env:
-#        OUTPUT-FILE: "${{ inputs.output-file }}.txt"
-#      run: |
-#        if [[ -s ${{ env.OUTPUT-FILE }} ]]; then
-#        {
-#          echo "### Trivy Scan Output"
-#          echo "<details><summary>Click to expand</summary>"
-#          echo ""
-#          echo '```scan-type ${{ inputs.scan-type }}'
-#          cat ${{ env.OUTPUT-FILE }}
-#          echo '```'
-#          echo "</details>"
-#
-#        } >> $GITHUB_STEP_SUMMARY
-#        fi
 
     - name: Check if GHAS is enabled
       uses: actions/github-script@v7
