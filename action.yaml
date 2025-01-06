@@ -37,11 +37,11 @@ runs:
   steps:
     - name: Validate Inputs
       shell: bash
+      if: ${{ inputs.scan-type == "image" }}
       env:
-        SCAN_TYPE: ${{ inputs.scan-type }}
         IMAGE_REF: ${{ inputs.image-ref }}
       run: |
-        if [[ ${{ env.SCAN_TYPE }} == "image" && ${{ env.IMAGE_REF }} == '' ]]; then
+        if [[ ${{ env.IMAGE_REF }} == '' ]]; then
         {
           echo "::error::scan-type of image requires image-ref"
           exit 1
@@ -62,13 +62,25 @@ runs:
         format: "json"
         output: "${{ inputs.output-file }}.json"
 
+    - name: Strip image name only
+      id: strip
+      if: ${{ inputs.scan-type == "image" }}
+       env:
+        IMAGE_REF: ${{ inputs.image-ref }}
+      run: |
+        basename=${IMAGE_REF##*/}
+        stripped=${basename%:*}
+        echo "stripped_file=$stripped" >> $GITHUB_OUTPUT
+
+
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.image-ref }}.json"
+        name: "${{ steps.strip.output.stripped_file }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
-        
+       
+
     - name: Convert output to text for github summary
       if: inputs.summary
       env:
@@ -78,50 +90,7 @@ runs:
       run: |
         trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
-#    - name: Create Trivy Report
-#      id: report
-#      shell: bash
-#      env:
-#        APP: ${{ inputs.app }}
-#      run: |
-#        echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }}) >> $GITHUB_ENV
-#        echo HEADER='## Trivy Scan Results for ${{ env.APP }}' >> $GITHUB_ENV
-#        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-#          echo 'BODY=<<EOF' >> $GITHUB_ENV
-#          echo '<details><summary>Click to expand</summary>\n' >> $GITHUB_ENV
-#          echo '```Scan results\n' >> $GITHUB_ENV
-#          echo "${{ env.trivy-report }}\n" >> $GITHUB_ENV
-#          echo '```\n' >> $GITHUB_ENV
-#          echo '</details>\n' >> $GITHUB_ENV
-#          echo "EOF" > $GITHUB_ENV
-#        else 
-#          echo "BODY='No issues found'" >> $GITHUB_ENV
-#        fi
-#        MESSAGE=$(printf "%s\n%s", ${{ env.HEADER }}, ${{ env.BODY }})
-#        echo "report=${{ env.MESSAGE }}" >> $GITHUB_OUTPUT
-#
-#    - name: Create Trivy Report
-#      id: report
-#      shell: bash
-#      env:
-#        APP: ${{ inputs.app }}
-#      run: |
-#        echo TRIVY_REPORT=$(cat ${{ steps.convert-text.outputs.text-file }})
-#          HEADER='## Trivy Scan Results for ${{ env.APP }}'
-#        if [[ -s "${{ steps.convert-text.outputs.text-file }}" ]]; then
-#          BODY='No issues found'
-#        else 
-#          BODY='No issues found'
-#        fi
-#        echo "Header is $HEADER\n"
-#        echo "Body is $BODY\n" 
-#
-#        IFS='' read -r -d MESSAGE <<-"EOF"
-#        $HEADER
-#        $BODY
-#        EOF
-#        echo "report=$MESSAGE" >> $GITHUB_OUTPUT
-#
+
 #
 #    - name: Post Scan Results to GitHub PR
 #      uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
@@ -141,6 +110,8 @@ runs:
 #          *Workflow: ${{ github.workflow }}*
 #          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
 #
+
+
     - name: Post Scan Results to Workflow Summary
       if: ${{ inputs.summary }}
       shell: bash
