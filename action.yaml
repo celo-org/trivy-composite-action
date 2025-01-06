@@ -37,7 +37,7 @@ runs:
   steps:
     - name: Validate Inputs
       shell: bash
-      if: inputs.scan-type == "image"
+      if: ${{ inputs.scan-type == 'image' }}
       env:
         IMAGE_REF: ${{ inputs.image-ref }}
       run: |
@@ -64,9 +64,10 @@ runs:
 
     - name: Strip image name only
       id: strip
-      if: inputs.scan-type == "image"
+      if: ${{ inputs.scan-type == 'image' }}
       env:
         IMAGE_REF: ${{ inputs.image-ref }}
+      shell: bash
       run: |
         basename=${IMAGE_REF##*/}
         stripped=${basename%:*}
