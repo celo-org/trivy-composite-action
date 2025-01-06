@@ -31,6 +31,9 @@ inputs:
   summary:
     description: "enable summary output"
     default: true
+  pr-comment:
+    description: "enable pull request comment"
+    default: true
 
 runs:
   using: "composite"
@@ -74,8 +77,8 @@ runs:
         path: ${{ env.TRIVY_OUTPUT }}
        
 
-    - name: Convert output to text for github summary
-      if: inputs.summary
+    - name: Convert output to text for github summary and PR
+      if: {{ inputs.summary || inputs.pr-comment }}
       env:
         OUTPUT-FILE: "${{ inputs.output-file }}.txt"
       id: convert-text
@@ -85,6 +88,7 @@ runs:
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
     - name: Build Report
+      if: {{ inputs.summary || inputs.pr-comment }}
       id: build-report
       shell: bash
       env:
@@ -115,7 +119,7 @@ runs:
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
-      if: github.event_name == 'pull_request'
+      if: {{ github.event_name == 'pull_request' && input.pr_comment }}
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
@@ -166,4 +170,3 @@ runs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: ${{ steps.convert-sarif.outputs.sarif-file }}
-
