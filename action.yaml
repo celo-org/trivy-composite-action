@@ -84,6 +84,31 @@ runs:
         trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
+    - name: Build Report
+      id: build-report
+      shell: bash
+      env:
+        TRIVY-TEXT-FILE: "${{ inputs.output-file }}.txt"
+      run: |
+        if [[ -s ${{ env.TRIVY-TEXT-FILE }} ]]; then
+        {
+          echo "### Trivy Scan Output"
+          echo "<details><summary>Click to expand</summary>"
+          echo ""
+          echo '```scan-type ${{ inputs.scan-type }}'
+          cat ${{ env.TRIVY-TEXT-FILE }}
+          echo '```'
+          echo "</details>"
+
+          echo "*Pusher: @${{ github.actor }}*"
+          *Action: "${{ github.event_name }}*"
+          *Working Directory: "${{ env.WORKDIR }}*"
+          *Workflow: "${{ github.workflow }}*"
+          *Execution link: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*"
+
+        } >> report.txt
+        echo "report=report.txt" >> $GITHUB_OUTPUT     
+        fi
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
@@ -92,36 +117,39 @@ runs:
         allow-repeats: true
         repo-token: ${{ github.token }}
         message-id: Trivy Scan ${{ github.workflow }}
-        message: |
-          Trivy scan for ${{ github.workflow }}
-
-          ${{ steps.convert-text.output.text-file }}
-
-          *Pusher: @${{ github.actor }}*
-          *Action: ${{ github.event_name }}*
-          *Working Directory: ${{ env.WORKDIR }}*
-          *Workflow: ${{ github.workflow }}*
-          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
-
+        message-path: ${{ steps.build-report.outputs.report }}
+#        message: |
+#          Trivy scan for ${{ github.workflow }}
+#
+#          ${{ steps.convert-text.output.text-file }}
+#
+#          *Pusher: @${{ github.actor }}*
+#          *Action: ${{ github.event_name }}*
+#          *Working Directory: ${{ env.WORKDIR }}*
+#          *Workflow: ${{ github.workflow }}*
+#          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
+#
 
     - name: Post Scan Results to Workflow Summary
       if: ${{ inputs.summary }}
       shell: bash
-      env:
-        OUTPUT-FILE: "${{ inputs.output-file }}.txt"
       run: |
-        if [[ -s ${{ env.OUTPUT-FILE }} ]]; then
-        {
-          echo "### Trivy Scan Output"
-          echo "<details><summary>Click to expand</summary>"
-          echo ""
-          echo '```scan-type ${{ inputs.scan-type }}'
-          cat ${{ env.OUTPUT-FILE }}
-          echo '```'
-          echo "</details>"
-
-        } >> $GITHUB_STEP_SUMMARY
-        fi
+        cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
+#      env:
+#        OUTPUT-FILE: "${{ inputs.output-file }}.txt"
+#      run: |
+#        if [[ -s ${{ env.OUTPUT-FILE }} ]]; then
+#        {
+#          echo "### Trivy Scan Output"
+#          echo "<details><summary>Click to expand</summary>"
+#          echo ""
+#          echo '```scan-type ${{ inputs.scan-type }}'
+#          cat ${{ env.OUTPUT-FILE }}
+#          echo '```'
+#          echo "</details>"
+#
+#        } >> $GITHUB_STEP_SUMMARY
+#        fi
 
     - name: Check if GHAS is enabled
       uses: actions/github-script@v7
