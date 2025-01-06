@@ -44,8 +44,6 @@ runs:
 
     - name: Run Trivy vulnerability scanner
       id: scan
-      env:
-        TRIVY_DEBUG: ${{ runner.debug == 1 && true || false }}
       uses: aquasecurity/trivy-action@master
       with:         
         scan-type: "${{ inputs.scan-type }}"
@@ -57,6 +55,7 @@ runs:
         output: "${{ inputs.output-file }}.json"
 
     - name: Strip image name only
+      # This is for a cleaner artifact name of the trivy report only.
       id: strip
       if: ${{ inputs.scan-type == 'image' }}
       env:
@@ -66,7 +65,6 @@ runs:
         basename=${IMAGE_REF##*/}
         stripped=${basename%:*}
         echo "stripped_file=$stripped" >> $GITHUB_OUTPUT
-
 
     - name: Upload json report as artifact
       id: upload-json
@@ -86,25 +84,24 @@ runs:
         trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
-#
-#    - name: Post Scan Results to GitHub PR
-#      uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
-#      if: github.event_name == 'pull_request'
-#      with:
-#        allow-repeats: true
-#        repo-token: ${{ github.token }}
-#        message-id: Trivy Scan ${{ github.workflow }}
-#        message: |
-#          Trivy scan for ${{ github.workflow }}
-#
-#          ${{ steps.convert-text.output.text-file }}
-#
-#          *Pusher: @${{ github.actor }}*
-#          *Action: ${{ github.event_name }}*
-#          *Working Directory: ${{ env.WORKDIR }}*
-#          *Workflow: ${{ github.workflow }}*
-#          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
-#
+
+    - name: Post Scan Results to GitHub PR
+      uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
+      if: github.event_name == 'pull_request'
+     with:
+        allow-repeats: true
+        repo-token: ${{ github.token }}
+        message-id: Trivy Scan ${{ github.workflow }}
+        message: |
+          Trivy scan for ${{ github.workflow }}
+
+          ${{ steps.convert-text.output.text-file }}
+
+          *Pusher: @${{ github.actor }}*
+          *Action: ${{ github.event_name }}*
+          *Working Directory: ${{ env.WORKDIR }}*
+          *Workflow: ${{ github.workflow }}*
+          *Execution link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}*
 
 
     - name: Post Scan Results to Workflow Summary
@@ -122,6 +119,7 @@ runs:
           cat ${{ env.OUTPUT-FILE }}
           echo '```'
           echo "</details>"
+
         } >> $GITHUB_STEP_SUMMARY
         fi
 
