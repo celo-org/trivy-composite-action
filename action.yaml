@@ -65,7 +65,7 @@ runs:
     - name: Strip image name only
       id: strip
       if: inputs.scan-type == "image"
-       env:
+      env:
         IMAGE_REF: ${{ inputs.image-ref }}
       run: |
         basename=${IMAGE_REF##*/}
