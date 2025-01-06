@@ -59,13 +59,23 @@ runs:
         format: "json"
         output: "${{ inputs.output-file }}.json"
 
+    - name: Strip image name
+      id: strip
+      env:
+        IMAGE: ${{ inputs.image-ref }}
+      run: |
+        basename="${IMAGE##*/}"
+        stripped_name="${basename%:*}"
+        echo "stripped=stripped_name" >> $GITHUB_OUTPUT
+
+
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
       env:
         APP_NAME: ${{ inputs.app }}
       with:
-        name: "${{ env.APP_NAME }}-trivy"
+        name: "${{ steps.strip.outputs.stripped }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
     - name: Convert output to text for github summary and PR
