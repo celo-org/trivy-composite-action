@@ -64,9 +64,7 @@ runs:
       shell: bash
       run: |
         basename=${IMAGE_REF##*/}
-        echo "basename is $basename"
         stripped=${basename%:*}
-        echo "stripped is $stripped"
         echo "stripped_file=$stripped" >> $GITHUB_OUTPUT
 
 
@@ -74,7 +72,7 @@ runs:
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ steps.strip.output.stripped_file }}-trivy"
+        name: "${{ steps.strip.outputs.stripped_file }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
 
