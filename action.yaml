@@ -73,8 +73,6 @@ runs:
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
-      env:
-        APP_NAME: ${{ inputs.app }}
       with:
         name: "${{ steps.strip.outputs.stripped }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
