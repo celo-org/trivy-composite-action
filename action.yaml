@@ -51,7 +51,7 @@ runs:
     - name: Run Trivy vulnerability scanner
       id: scan
       env:
-        TRIVY_DEBUG: true
+        TRIVY_DEBUG: ${{ runner.debug == 1 && true || false }}
       uses: aquasecurity/trivy-action@master
       with:         
         scan-type: "${{ inputs.scan-type }}"
@@ -60,13 +60,13 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-        output: "${{ env.TRIVY_OUTPUT }}"
+        output: "${{ inputs.output-file }}"
 
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.IMAGE_REF }}.json
+        name: ${{ inputs.image_ref }}.json
         path: ${{ env.TRIVY_OUTPUT }}
         
     - name: Convert output to text for github summary
