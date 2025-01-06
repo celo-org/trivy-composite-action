@@ -70,7 +70,9 @@ runs:
       shell: bash
       run: |
         basename=${IMAGE_REF##*/}
+        echo "basename is $basename"
         stripped=${basename%:*}
+        echo "stripped is $stripped"
         echo "stripped_file=$stripped" >> $GITHUB_OUTPUT
 
 
