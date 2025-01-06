@@ -63,6 +63,7 @@ runs:
       id: strip
       env:
         IMAGE: ${{ inputs.image-ref }}
+      shell: bash
       run: |
         basename="${IMAGE##*/}"
         stripped_name="${basename%:*}"
