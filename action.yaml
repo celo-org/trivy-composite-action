@@ -67,7 +67,7 @@ runs:
       run: |
         basename="${IMAGE##*/}"
         stripped_name="${basename%:*}"
-        echo "stripped=stripped_name" >> $GITHUB_OUTPUT
+        echo "stripped=$stripped_name" >> $GITHUB_OUTPUT
 
 
     - name: Upload json report as artifact
