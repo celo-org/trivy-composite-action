@@ -66,7 +66,7 @@ runs:
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.image_ref }}.json"
+        name: "${{ inputs.image-ref }}.json"
         path: ${{ env.TRIVY_OUTPUT }}
         
     - name: Convert output to text for github summary
