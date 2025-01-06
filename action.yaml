@@ -59,23 +59,13 @@ runs:
         format: "json"
         output: "${{ inputs.output-file }}.json"
 
-    - name: Strip image name only
-      # This is for a cleaner artifact name of the trivy report only.
-      id: strip
-      if: ${{ inputs.scan-type == 'image' }}
-      env:
-        IMAGE_REF: ${{ inputs.image-ref }}
-      shell: bash
-      run: |
-        basename=${IMAGE_REF##*/}
-        stripped=${basename%:*}
-        echo "stripped_file=$stripped" >> $GITHUB_OUTPUT
-
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
+      env:
+        APP_NAME: ${{ inputs.app }}
       with:
-        name: "${{ steps.strip.outputs.stripped_file }}-trivy"
+        name: "${{ env.APP_NAME }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
     - name: Convert output to text for github summary and PR
