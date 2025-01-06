@@ -63,6 +63,13 @@ runs:
         format: "json"
         output: "${{ env.OUTPUT-FILE }}"
 
+    - name: Upload json report as artifact
+      id: upload-json
+      env:
+        OUTPUT-FILE: "${{ inputs.output-file }}.json"
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.OUTPUT-FILE }}
 
     - name: Convert output to text for github summary
       if: inputs.summary
