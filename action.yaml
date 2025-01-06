@@ -51,7 +51,6 @@ runs:
     - name: Run Trivy vulnerability scanner
       id: scan
       env:
-        OUTPUT-FILE: "${{ inputs.output-file }}.json"
         TRIVY_DEBUG: true
       uses: aquasecurity/trivy-action@master
       with:         
@@ -61,27 +60,24 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-        output: "${{ env.OUTPUT-FILE }}"
+        output: "${{ env.TRIVY_OUTPUT }}"
 
     - name: Upload json report as artifact
       id: upload-json
-      env:
-        OUTPUT-FILE: "${{ inputs.output-file }}.json"
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.IMAGE_REF }}
-        path: ${{ env.OUTPUT-FILE }}
+        name: ${{ inputs.IMAGE_REF }}.json
+        path: ${{ env.TRIVY_OUTPUT }}
         
-
     - name: Convert output to text for github summary
       if: inputs.summary
       env:
-        OUTPUT-FILE: "${{ inputs.output-file }}"
+        OUTPUT-FILE: "${{ inputs.output-file }}".txt
       id: convert-text
       shell: bash
       run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }}.txt ${{ env.OUTPUT-FILE }}.json
-        echo "text-file=${{ env.OUTPUT-FILE }}.txt" >> $GITHUB_OUTPUT
+        trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
+        echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
 #    - name: Create Trivy Report
 #      id: report
@@ -193,7 +189,7 @@ runs:
       id: convert-sarif
       shell: bash
       run: |
-        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.OUTPUT-FILE }}.json
+        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.TRIVY_JSON }}
         echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
     
     - name: Upload Trivy scan results to GitHub Security tab
