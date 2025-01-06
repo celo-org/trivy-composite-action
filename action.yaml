@@ -103,12 +103,11 @@ runs:
           echo ""
           echo '```scan-type ${{ env.SCAN-TYPE }}'
           cat ${{ env.TRIVY-TEXT-FILE }}
-          echo "\n"
-          echo "*Pusher: @${{ env.ACTOR }}*\n"
-          echo "*Action: ${{ env.EVENT-NAME }}*\n"
-          echo "*Working Directory: ${{ env.WORKDIR }}*\n"
-          echo "*Workflow: ${{ env.WORKFLOW }}*\n"
-          echo "*Execution link: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }} *\n"
+          echo ""
+          echo "*Pusher: @${{ env.ACTOR }}*"
+          echo "*Action: ${{ env.EVENT-NAME }}*"
+          echo "*Workflow: ${{ env.WORKFLOW }}*"
+          echo "*Execution link: [link] (https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN-ID }}) *"
           echo '```'
           echo "</details>"
         } >> report.txt
