@@ -78,23 +78,22 @@ runs:
         name: "${{ steps.strip.outputs.stripped_file }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
-
     - name: Convert output to text for github summary and PR
-      if: {{ inputs.summary == true || inputs.pr-comment == true }}
+      id: convert-text
+      if: ${{ inputs.summary || inputs.pr-comment }}
       env:
         OUTPUT-FILE: "${{ inputs.output-file }}.txt"
-      id: convert-text
       shell: bash
       run: |
         trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
     - name: Build Report
-      if: {{ inputs.summary == true || inputs.pr-comment == true }}
+      if: ${{ inputs.summary || inputs.pr-comment }}
       id: build-report
       shell: bash
       env:
-        TRIVY-TEXT-FILE: "${{ inputs.output-file }}.txt"
+        TRIVY-TEXT-FILE: ${{ steps.convert-text.outputs.text-file }}
         ACTOR: ${{ github.actor }}
         EVENT-NAME: ${{ github.event_name }}
         WORKFLOW: ${{ github.workflow }}
@@ -129,7 +128,7 @@ runs:
         message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Post Scan Results to Workflow Summary
-      if: ${{ inputs.summary == true }}
+      if: ${{ inputs.summary }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
