@@ -37,16 +37,10 @@ runs:
   steps:
     - name: Validate Inputs
       shell: bash
-      if: ${{ inputs.scan-type == 'image' }}
-      env:
-        IMAGE_REF: ${{ inputs.image-ref }}
+      if: ${{ inputs.scan-type == 'image' && inputs.image-ref == '' }}
       run: |
-        if [[ ${{ env.IMAGE_REF }} == '' ]]; then
-        {
-          echo "::error::scan-type of image requires image-ref"
-          exit 1
-        }
-        fi
+        echo "::error::scan-type of image requires image-ref"
+        exit 1
 
     - name: Run Trivy vulnerability scanner
       id: scan
