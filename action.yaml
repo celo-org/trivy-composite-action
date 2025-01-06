@@ -92,7 +92,7 @@ runs:
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
       run: |
-        if [ -s ${{ env.TRIVY-TEXT-FILE ] 
+        if [ -s ${{ env.TRIVY-TEXT-FILE }} ] 
           {
             echo "### Trivy Scan Output"
             echo "<details><summary>Click to expand</summary>"
