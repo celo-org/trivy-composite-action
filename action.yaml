@@ -141,15 +141,15 @@ runs:
       if: ${{ inputs.summary }}
       shell: bash
       env:
-        OUTPUT-FILE: "${{ inputs.output-file }}"
+        OUTPUT-FILE: "${{ inputs.output-file }}.txt"
       run: |
-        if [[ -s  ]]; then
+        if [[ -s ${{ env.OUTPUT-FILE ]]; then
         {
           echo "### Trivy Scan Output"
           echo "<details><summary>Click to expand</summary>"
           echo ""
           echo '```scan-type ${{ inputs.scan-type }}'
-          cat ${{ env.OUTPUT-FILE }}.txt
+          cat ${{ env.OUTPUT-FILE }}
           echo '```'
           echo "</details>"
         } >> $GITHUB_STEP_SUMMARY
