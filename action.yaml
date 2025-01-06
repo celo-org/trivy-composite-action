@@ -92,20 +92,22 @@ runs:
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
       run: |
-        {
-          echo "### Trivy Scan Output"
-          echo "<details><summary>Click to expand</summary>"
-          echo ""
-          echo '```scan-type ${{ env.SCAN-TYPE }}'
-          cat ${{ env.TRIVY-TEXT-FILE }}
-          echo '```'
-          echo "</details>"
-        } >> report.txt
-        echo "report=report.txt" >> $GITHUB_OUTPUT     
+        if [ -s ${{ env.TRIVY-TEXT-FILE ] 
+          {
+            echo "### Trivy Scan Output"
+            echo "<details><summary>Click to expand</summary>"
+            echo ""
+            echo '```scan-type ${{ env.SCAN-TYPE }}'
+            cat ${{ env.TRIVY-TEXT-FILE }}
+            echo '```'
+            echo "</details>"
+          } >> report.txt
+          echo "report=report.txt" >> $GITHUB_OUTPUT     
+        fi
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
-      if: ${{ github.event_name == 'pull_request' && inputs.pr_comment }}
+      if: ${{ github.event_name == 'pull_request' && inputs.pr_comment && env.report != '' }}
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
@@ -113,7 +115,7 @@ runs:
         message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Post Scan Results to Workflow Summary
-      if: ${{ inputs.summary }}
+      if: ${{ inputs.summary && env.report != '' }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
