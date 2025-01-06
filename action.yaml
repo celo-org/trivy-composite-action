@@ -78,7 +78,7 @@ runs:
        
 
     - name: Convert output to text for github summary and PR
-      if: {{ inputs.summary || inputs.pr-comment }}
+      if: {{ inputs.summary == true || inputs.pr-comment == true }}
       env:
         OUTPUT-FILE: "${{ inputs.output-file }}.txt"
       id: convert-text
@@ -88,7 +88,7 @@ runs:
         echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
 
     - name: Build Report
-      if: {{ inputs.summary || inputs.pr-comment }}
+      if: {{ inputs.summary == true || inputs.pr-comment == true }}
       id: build-report
       shell: bash
       env:
@@ -127,7 +127,7 @@ runs:
         message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Post Scan Results to Workflow Summary
-      if: ${{ inputs.summary }}
+      if: ${{ inputs.summary == true }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
