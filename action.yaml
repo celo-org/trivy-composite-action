@@ -31,9 +31,11 @@ inputs:
   summary:
     description: "enable summary output"
     default: true
+    type: boolean
   pr-comment:
     description: "enable pull request comment"
     default: true
+    type: boolean
 
 runs:
   using: "composite"
