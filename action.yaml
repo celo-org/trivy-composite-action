@@ -69,7 +69,9 @@ runs:
         OUTPUT-FILE: "${{ inputs.output-file }}.json"
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.OUTPUT-FILE }}
+        name: ${{ inputs.IMAGE_REF }}
+        path: ${{ env.OUTPUT-FILE }}
+        
 
     - name: Convert output to text for github summary
       if: inputs.summary
