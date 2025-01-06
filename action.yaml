@@ -60,13 +60,13 @@ runs:
         vuln-type: "${{ inputs.vuln-type }}"
         severity: "${{ inputs.severity }}"
         format: "json"
-        output: "${{ inputs.output-file }}"
+        output: "${{ inputs.output-file }}.json"
 
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.image_ref }}.json
+        name: "${{ inputs.image_ref }}.json"
         path: ${{ env.TRIVY_OUTPUT }}
         
     - name: Convert output to text for github summary
