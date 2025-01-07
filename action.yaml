@@ -1,10 +1,6 @@
 name: Trivy
 description: "Run a Trivy Scan and upload the results"
 inputs:
-  app:
-    description: "app name for report"
-    required: true
-    type: string
   image-ref:
     description: "image to scan"
     required: false
