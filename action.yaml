@@ -77,7 +77,8 @@ runs:
           basename="${IMAGE##*/}"
           stripped_name="${basename%:*}"
         elif [ -n "$SCAN" ]; then
-          stripped_name="$SCAN"
+          basename="${SCAN##*/}"
+          stripped_name="$basename"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
