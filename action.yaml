@@ -53,7 +53,6 @@ runs:
         echo "::error::scan-type of fs requires scan-ref"
         exit 1
 
-
     - name: Run Trivy vulnerability scanner
       id: scan
       uses: aquasecurity/trivy-action@master
@@ -67,16 +66,20 @@ runs:
         format: "json"
         output: "${{ inputs.output-file }}.json"
 
-    - name: Strip image name
-      id: strip
+    - name: Get name
+      id: get-name
       env:
         IMAGE: ${{ inputs.image-ref }}
+        SCAN: ${{ inputs.scan-ref }}
       shell: bash
       run: |
-        basename="${IMAGE##*/}"
-        stripped_name="${basename%:*}"
+        if [ -n "$IMAGE" ]; then
+          basename="${IMAGE##*/}"
+          stripped_name="${basename%:*}"
+        elif [ -n "$SCAN" ]; then
+          stripped_name="${SCAN}"
+        fi
         echo "stripped=$stripped_name" >> $GITHUB_OUTPUT
-
 
     - name: Upload json report as artifact
       id: upload-json
