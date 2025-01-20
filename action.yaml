@@ -46,7 +46,7 @@ runs:
         echo "::error::scan-type of image requires image-ref"
         exit 1
 
-  - name: Validate Inputs
+    - name: Validate Inputs
       shell: bash
       if: ${{ inputs.scan-type == 'fs' && inputs.scan-ref == '' }}
       run: |
