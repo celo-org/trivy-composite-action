@@ -77,15 +77,15 @@ runs:
           basename="${IMAGE##*/}"
           stripped_name="${basename%:*}"
         elif [ -n "$SCAN" ]; then
-          stripped_name="${SCAN}"
+          stripped_name="$SCAN"
         fi
-        echo "stripped=$stripped_name" >> $GITHUB_OUTPUT
+        echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
     - name: Upload json report as artifact
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ steps.strip.outputs.stripped }}-trivy"
+        name: "${{ steps.get-name.outputs.name }}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
     - name: Convert output to text for github summary and PR
