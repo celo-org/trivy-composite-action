@@ -9,6 +9,9 @@ inputs:
     description: "type of scan"
     required: true
     type: string
+  scan-ref:
+    description: "path to scan for scan-type fs"
+    type: string
   timeout:
     description: "how long to scan"
     default: 15m
@@ -43,11 +46,20 @@ runs:
         echo "::error::scan-type of image requires image-ref"
         exit 1
 
+  - name: Validate Inputs
+      shell: bash
+      if: ${{ inputs.scan-type == 'fs' && inputs.scan-ref == '' }}
+      run: |
+        echo "::error::scan-type of fs requires scan-ref"
+        exit 1
+
+
     - name: Run Trivy vulnerability scanner
       id: scan
       uses: aquasecurity/trivy-action@master
       with:         
         scan-type: "${{ inputs.scan-type }}"
+        scan-ref: "${{ inputs.scan-ref }}"
         image-ref: "${{ inputs.image-ref }}"
         timeout: "${{ inputs.timeout }}"
         vuln-type: "${{ inputs.vuln-type }}"
