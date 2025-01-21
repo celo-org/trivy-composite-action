@@ -65,6 +65,7 @@ runs:
         severity: "${{ inputs.severity }}"
         format: "json"
         output: "${{ inputs.output-file }}.json"
+        cache: false
 
     - name: Get name
       id: get-name
