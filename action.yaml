@@ -71,14 +71,13 @@ runs:
       id: get-name
       env:
         IMAGE: ${{ inputs.image-ref }}
-        SCAN: ${{ inputs.scan-ref }}
       shell: bash
       run: |
         if [ -n "$IMAGE" ]; then
           basename="${IMAGE##*/}"
           stripped_name="${basename%:*}"
-        elif [ -n "$SCAN" ]; then
-          basename="${SCAN##*/}"
+        else 
+          basename="${inputs.working-dir##*/}"
           stripped_name="$basename"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
