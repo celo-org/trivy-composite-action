@@ -32,6 +32,7 @@ inputs:
     default: true
     type: boolean
   skip-dirs:
+    type: string
     description: "directories to skip with trivy"
     required: false
   pr-comment:
