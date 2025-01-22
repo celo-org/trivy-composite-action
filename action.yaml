@@ -130,7 +130,7 @@ runs:
 
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
-      if: ${{ github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.output.report != '' }}
+      if: ${{ github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != '' }}
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
@@ -138,7 +138,7 @@ runs:
         message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Post Scan Results to Workflow Summary
-      if: ${{ inputs.summary && steps.build-report.output.report != '' }}
+      if: ${{ inputs.summary && steps.build-report.outputs.report != '' }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
@@ -168,7 +168,7 @@ runs:
     - name: Convert output to Sarif for codescanning
       env:
         OUTPUT-FILE: ${{ inputs.output-file }}
-      if: steps.ghas-enabled.output.result
+      if: steps.ghas-enabled.outputs.result
       id: convert-sarif
       shell: bash
       run: |
@@ -176,7 +176,7 @@ runs:
         echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
     
     - name: Upload Trivy scan results to GitHub Security tab
-      if: steps.ghas-enabled.output.result
+      if: steps.ghas-enabled.outputs.result
       id: upload
       uses: github/codeql-action/upload-sarif@v3
       with:
