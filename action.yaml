@@ -35,6 +35,11 @@ inputs:
     type: string
     description: "directories to skip with trivy"
     required: false
+  skip-setup:
+    type: boolean
+    description: "skip trivy setup if its already been used before"
+    default: false
+
   pr-comment:
     description: "enable pull request comment"
     default: true
@@ -71,6 +76,7 @@ runs:
         output: "${{ inputs.output-file }}.json"
         cache: false
         skip-dirs: ${{ inputs.skip-dirs }}
+        skip-setup-trivy: ${{ inputs.skip-setup }}
 
     - name: Get name
       id: get-name
