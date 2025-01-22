@@ -114,10 +114,14 @@ runs:
         REPO: ${{ github.repository }}
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
+        IMAGE-REF: ${{ inputs.image-ref }}
+        SCAN-REF: ${{ inputs.scan-ref }}
       run: |
         if [ -s ${{ env.TRIVY-TEXT-FILE }} ]; then
+          [[ $SCAN-TYPE = 'image' ]] && target="$IMAGE-REF" || target="$SCAN-REF"
           {
             echo "### Trivy Scan Output"
+            echo "Target: $target"
             echo "<details><summary>Click to expand</summary>"
             echo ""
             echo '```scan-type ${{ env.SCAN-TYPE }}'
