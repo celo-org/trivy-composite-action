@@ -88,7 +88,7 @@ runs:
       id: upload-json
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ steps.get-name.outputs.name }}-trivy"
+        name: "${{ steps.get-name.outputs.name }}-${{ input.scan-type}}-trivy"
         path: ${{ env.TRIVY_OUTPUT }}
        
     - name: Convert output to text for github summary and PR
