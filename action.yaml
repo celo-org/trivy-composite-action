@@ -114,13 +114,14 @@ runs:
         REPO: ${{ github.repository }}
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
-        IMAGEREF: ${{ inputs.image-ref }}
+        IMAGE ${{ steps.get-name.outputs.name }}
         SCANREF: ${{ inputs.scan-ref }}
       run: |
         if [ -s ${{ env.TRIVY-TEXT-FILE }} ]; then
-          [[ $SCAN-TYPE = 'image' ]] && target="$IMAGEREF" || target="$SCANREF"
+          [[ $SCAN-TYPE = 'image' ]] && target="$IMAGE" || target="$SCANREF"
           {
             echo "### Trivy Scan Output"
+            echo "Scan Type: $SCAN-TYPE"
             echo "Target: $target"
             echo "<details><summary>Click to expand</summary>"
             echo ""
@@ -128,6 +129,9 @@ runs:
             cat ${{ env.TRIVY-TEXT-FILE }}
             echo '```'
             echo "</details>"
+            echo "############################"
+            echo "############################"
+
           } >> report.txt
           echo "report=report.txt" >> $GITHUB_OUTPUT     
         fi
