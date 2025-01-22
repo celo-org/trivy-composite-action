@@ -31,6 +31,9 @@ inputs:
     description: "enable summary output"
     default: true
     type: boolean
+  skip-dirs:
+    description: "directories to skip with trivy"
+    required: false
   pr-comment:
     description: "enable pull request comment"
     default: true
@@ -57,15 +60,16 @@ runs:
       id: scan
       uses: aquasecurity/trivy-action@master
       with:         
-        scan-type: "${{ inputs.scan-type }}"
-        scan-ref: "${{ inputs.scan-ref }}"
-        image-ref: "${{ inputs.image-ref }}"
-        timeout: "${{ inputs.timeout }}"
-        vuln-type: "${{ inputs.vuln-type }}"
-        severity: "${{ inputs.severity }}"
+        scan-type: ${{ inputs.scan-type }}
+        scan-ref: ${{ inputs.scan-ref }}
+        image-ref: ${{ inputs.image-ref }}
+        timeout: ${{ inputs.timeout }}
+        vuln-type: ${{ inputs.vuln-type }}
+        severity: ${{ inputs.severity }}
         format: "json"
         output: "${{ inputs.output-file }}.json"
         cache: false
+        skip-dirs: ${{ inputs.skip-dirs }}
 
     - name: Get name
       id: get-name
