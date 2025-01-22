@@ -172,11 +172,11 @@ runs:
     - name: Convert output to Sarif for codescanning
       env:
         OUTPUT-FILE: ${{ inputs.output-file }}
-      if: steps.ghas-enabled.outputs.result
+      if: fromJSON(steps.ghas-enabled.outputs.result)
       id: convert-sarif
       shell: bash
       run: |
-        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.TRIVY_JSON }}
+        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.TRIVY_OUTPUT }}
         echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
     
     - name: Upload Trivy scan results to GitHub Security tab
