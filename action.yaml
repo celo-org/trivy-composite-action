@@ -114,7 +114,7 @@ runs:
         REPO: ${{ github.repository }}
         RUN-ID: ${{ github.run_id }}
         SCAN-TYPE: ${{ inputs.scan-type }}
-        IMAGE ${{ steps.get-name.outputs.name }}
+        IMAGE: ${{ steps.get-name.outputs.name }}
         SCANREF: ${{ inputs.scan-ref }}
       run: |
         if [ -s ${{ env.TRIVY-TEXT-FILE }} ]; then
