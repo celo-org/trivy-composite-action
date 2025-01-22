@@ -120,7 +120,7 @@ runs:
         if [ -s ${{ env.TRIVY-TEXT-FILE }} ]; then
           [[ $SCANTYPE = 'image' ]] && target="$IMAGE" || target="$SCANREF"
           {
-            echo "### Trivy Scan Output"
+            echo "Trivy Scan Output"
             echo "Scan Type: $SCANTYPE"
             echo "Target: $target"
             echo "<details><summary>Click to expand</summary>"
@@ -129,9 +129,6 @@ runs:
             cat ${{ env.TRIVY-TEXT-FILE }}
             echo '```'
             echo "</details>"
-            echo "############################"
-            echo "############################"
-
           } >> report.txt
           echo "report=report.txt" >> $GITHUB_OUTPUT     
         fi
