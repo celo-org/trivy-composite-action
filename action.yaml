@@ -120,7 +120,7 @@ runs:
         ACTOR: ${{ github.actor }}
         EVENT-NAME: ${{ github.event_name }}
         WORKFLOW: ${{ github.workflow }}
-        WORKDIR:  ${{ github.workdir }}
+        WORKDIR:  ${{ inputs.scan-ref }}
         REPO: ${{ github.repository }}
         RUN-ID: ${{ github.run_id }}
         SCANTYPE: ${{ inputs.scan-type }}
@@ -147,7 +147,7 @@ runs:
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
       if: ${{ github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != '' }}
       env:
-        WORKDIR:  ${{ github.workdir }}
+        WORKDIR:  ${{ inputs.scan-ref }}
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
