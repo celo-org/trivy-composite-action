@@ -146,13 +146,11 @@ runs:
     - name: Post Scan Results to GitHub PR
       uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
       if: github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != ''
-      env:
-        WORKDIR:  ${{ inputs.scan-ref }}
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
         message-id: Trivy Scan ${{ github.workflow }}
-        message-path: "${{ env.WORKDIR }}/${{ steps.build-report.outputs.report }}"
+        message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Post Scan Results to Workflow Summary
       if: ${{ inputs.summary && steps.build-report.outputs.report != '' }}
