@@ -139,8 +139,8 @@ runs:
             cat ${{ env.TRIVY-TEXT-FILE }}
             echo '```'
             echo "</details>"
-          } > report.txt
-          echo "report=report.txt" >> $GITHUB_OUTPUT     
+          } > "${{ env.WORKDIR }}/report.txt"
+          echo "report=${{ env.WORKDIR }}/report.txt" >> $GITHUB_OUTPUT     
         fi
 
     - name: Post Scan Results to GitHub PR
