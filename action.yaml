@@ -196,3 +196,4 @@ runs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: ${{ steps.convert-sarif.outputs.sarif-file }}
+        category: ${{ inputs.scan-type }}-${{ inputs.scan-ref != '' && inputs.scan-ref || inputs.image-ref }}
