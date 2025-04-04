@@ -119,6 +119,8 @@ runs:
         echo "Report file: ${{ steps.build-report.outputs.report }}"
         echo "Report content:"
         cat ${{ steps.build-report.outputs.report }}
+        echo "${{ github.event_name }}"
+        echo "${{ inputs.pr-comment }}"
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != ''
