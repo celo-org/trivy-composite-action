@@ -113,6 +113,13 @@ runs:
         echo "</details>" >> $REPORT_FILE
         echo "report=$REPORT_FILE" >> $GITHUB_OUTPUT
 
+    - name: Debug report
+      shell: bash
+      run: |
+        echo "Report file: ${{ steps.build-report.outputs.report }}"
+        echo "Report content:"
+        cat ${{ steps.build-report.outputs.report }}
+
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != ''
       uses: mshick/add-pr-comment@v2
