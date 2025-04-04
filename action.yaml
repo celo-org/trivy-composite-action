@@ -66,15 +66,20 @@ runs:
 
     - name: Derive Report Name
       id: report-name
+      env:
+        IMAGE: ${{ inputs.image-ref }}
+        SCAN_REF: ${{ inputs.scan-ref }}
       shell: bash
       run: |
-        if [ -n "${{ inputs.image-ref }}" ]; then
-          base="${{ inputs.image-ref##*/ }}"
-          name="${base%:*}"
-        else
-          name="${{ inputs.scan-ref##*/ }}"
+        if [ -n "$IMAGE" ]; then
+          basename="${IMAGE##*/}"
+          stripped_name="${basename%:*}"
+        else 
+          workdir=$(pwd)
+          basename="${SCAN_REF##*/}"
+          stripped_name="$basename"
         fi
-        echo "name=$name" >> $GITHUB_OUTPUT
+        echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
