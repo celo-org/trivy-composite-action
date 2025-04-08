@@ -1,84 +1,74 @@
 name: Trivy
 description: "Run a Trivy Scan and upload the results"
+
 inputs:
-  image-ref:
-    description: "image to scan"
-    required: false
-    type: string
   scan-type:
-    description: "type of scan"
+    description: "type of scan: image or fs"
     required: true
     type: string
+  image-ref:
+    description: "image to scan (required if scan-type is image)"
+    type: string
   scan-ref:
-    description: "path to scan for scan-type fs"
+    description: "path to scan (required if scan-type is fs)"
     type: string
   timeout:
-    description: "how long to scan"
     default: 15m
     type: string
   vuln-type:
-    description: "types of vulnerabilities to report"
     default: "os,library"
     type: string
   severity:
-    description: "severity of issues to report"
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
   output-file:
-    description: "outputfile, this is used mostly as a run level variable since not supported in composite actions"
     default: "trivy"
   summary:
-    description: "enable summary output"
+    default: true
+    type: boolean
+  pr-comment:
     default: true
     type: boolean
   skip-dirs:
     type: string
-    description: "directories to skip with trivy"
-    required: false
   skip-setup:
-    type: boolean
-    description: "skip trivy setup if its already been used before"
     default: false
-  pr-comment:
-    description: "enable pull request comment"
-    default: true
     type: boolean
 
 runs:
   using: "composite"
   steps:
-    - name: Validate Inputs
+    - name: Validate Required Inputs
       shell: bash
-      if: ${{ inputs.scan-type == 'image' && inputs.image-ref == '' }}
       run: |
-        echo "::error::scan-type of image requires image-ref"
-        exit 1
+        if [[ "${{ inputs.scan-type }}" == "image" && -z "${{ inputs.image-ref }}" ]]; then
+          echo "::error::scan-type=image requires image-ref"
+          exit 1
+        elif [[ "${{ inputs.scan-type }}" == "fs" && -z "${{ inputs.scan-ref }}" ]]; then
+          echo "::error::scan-type=fs requires scan-ref"
+          exit 1
+        elif [[ "${{ inputs.scan-type }}" != "image" && "${{ inputs.scan-type }}" != "fs" ]]; then
+          echo "::error::scan-type must be either 'image' or 'fs'"
+          exit 1
+        fi
 
-    - name: Validate Inputs
-      shell: bash
-      if: ${{ inputs.scan-type == 'fs' && inputs.scan-ref == '' }}
-      run: |
-        echo "::error::scan-type of fs requires scan-ref"
-        exit 1
-
-    - name: Run Trivy vulnerability scanner
-      id: scan
+    - name: Run Trivy Scan
+      id: trivy
       uses: aquasecurity/trivy-action@master
-      with:         
+      with:
         scan-type: ${{ inputs.scan-type }}
-        scan-ref: ${{ inputs.scan-ref }}
         image-ref: ${{ inputs.image-ref }}
+        scan-ref: ${{ inputs.scan-ref }}
         timeout: ${{ inputs.timeout }}
         vuln-type: ${{ inputs.vuln-type }}
         severity: ${{ inputs.severity }}
-        format: "json"
-        output: "${{ inputs.output-file }}.json"
-        cache: false
+        format: json
+        output: ${{ inputs.output-file }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         skip-setup-trivy: ${{ inputs.skip-setup }}
 
-    - name: Get name
-      id: get-name
+    - name: Derive Report Name
+      id: report-name
       env:
         IMAGE: ${{ inputs.image-ref }}
         SCAN_REF: ${{ inputs.scan-ref }}
@@ -86,114 +76,88 @@ runs:
       run: |
         if [ -n "$IMAGE" ]; then
           basename="${IMAGE##*/}"
-          stripped_name="${basename%:*}"
+          stripped_name="${basename%:*}-${basename##*:}"
         else 
-          workdir=$(pwd)
           basename="${SCAN_REF##*/}"
-          stripped_name="$basename"
+          random_id=$(openssl rand -hex 6)
+          stripped_name="${basename}-${random_id}"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
-    - name: Upload json report as artifact
-      id: upload-json
+    - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ steps.get-name.outputs.name }}-${{ inputs.scan-type}}-trivy"
-        path: ${{ env.TRIVY_OUTPUT }}
-       
-    - name: Convert output to text for github summary and PR
-      id: convert-text
+        name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy
+        path: ${{ inputs.output-file }}.json
+
+    - name: Convert Report to Text
       if: ${{ inputs.summary || inputs.pr-comment }}
-      env:
-        OUTPUT-FILE: "${{ inputs.output-file }}.txt"
+      id: convert-text
       shell: bash
       run: |
-        trivy convert --format table  --output ${{ env.OUTPUT-FILE }} ${{ env.TRIVY_OUTPUT }}
-        echo "text-file=${{ env.OUTPUT-FILE }}" >> $GITHUB_OUTPUT
+        trivy convert --format table --output ${{ inputs.output-file }}.txt ${{ inputs.output-file }}.json
+        echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
 
-    - name: Build Report
+    - name: Build Report for PR and Summary
       if: ${{ inputs.summary || inputs.pr-comment }}
       id: build-report
       shell: bash
-      env:
-        TRIVY-TEXT-FILE: ${{ steps.convert-text.outputs.text-file }}
-        ACTOR: ${{ github.actor }}
-        EVENT-NAME: ${{ github.event_name }}
-        WORKFLOW: ${{ github.workflow }}
-        WORKDIR:  ${{ inputs.scan-ref }}
-        REPO: ${{ github.repository }}
-        RUN-ID: ${{ github.run_id }}
-        SCANTYPE: ${{ inputs.scan-type }}
-        IMAGE: ${{ steps.get-name.outputs.name }}
-        SCANREF: ${{ inputs.scan-ref }}
       run: |
-        if [ -s ${{ env.TRIVY-TEXT-FILE }} ]; then
-          [[ $SCANTYPE = 'image' ]] && target="$IMAGE" || target="$SCANREF"
-          {
-            echo "Trivy Scan Output"
-            echo "Scan Type: $SCANTYPE"
-            echo "Target: $target"
-            echo "<details><summary>Click to expand</summary>"
-            echo ""
-            echo '```scan-type ${{ env.SCANTYPE }}'
-            cat ${{ env.TRIVY-TEXT-FILE }}
-            echo '```'
-            echo "</details>"
-          } > "${{ env.WORKDIR }}/report.txt"
-          echo "report=${{ env.WORKDIR }}/report.txt" >> $GITHUB_OUTPUT     
-        fi
+        REPORT_FILE="report.txt"
+        echo "Trivy Scan Output" > $REPORT_FILE
+        echo "Scan Type: ${{ inputs.scan-type }}" >> $REPORT_FILE
+        TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
+        echo "Target: $TARGET" >> $REPORT_FILE
+        echo "Report Artifact Name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy" >> $REPORT_FILE
+        echo "<details><summary>Click to expand</summary>" >> $REPORT_FILE
+        echo "" >> $REPORT_FILE
+        echo '```' >> $REPORT_FILE
+        cat ${{ steps.convert-text.outputs.text }} >> $REPORT_FILE
+        echo '```' >> $REPORT_FILE
+        echo "</details>" >> $REPORT_FILE
+        echo "report=$REPORT_FILE" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
-      uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
-      if: github.event_name == 'pull_request' && inputs.pr-comment && steps.build-report.outputs.report != ''
+      if: github.event_name == 'pull_request' && inputs.pr-comment == true && steps.build-report.outputs.report != ''
+      uses: mshick/add-pr-comment@v2
       with:
         allow-repeats: true
         repo-token: ${{ github.token }}
-        message-id: Trivy Scan ${{ github.workflow }}
+        message-id: Trivy Scan
         message-path: ${{ steps.build-report.outputs.report }}
 
-    - name: Post Scan Results to Workflow Summary
+    - name: Add Report to Workflow Summary
       if: ${{ inputs.summary && steps.build-report.outputs.report != '' }}
       shell: bash
       run: |
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
 
-    - name: Check if GHAS is enabled
+    - name: Check if GHAS is Enabled
       uses: actions/github-script@v7
-      id: ghas-enabled
+      id: ghas-check
       with:
         script: |
-          const response = await github.rest.repos.get({
-            owner: '${{ github.repository }}'.split("/")[0],
-            repo: '${{ github.repository }}'.split("/")[1]
-          });
-          const private = response.data.private
-          
-          if (private) {
-            const securityEnabled = response.data.security_and_analysis?.advanced_security?.status === 'enabled';
- 
-            if (!securityEnabled) {
-              const message = 'GitHub Advanced Security is NOT enabled and repo is private. Can not upload report, check summary';
-              core.warning(message);
-              return false
-            }
+          const [owner, repo] = '${{ github.repository }}'.split("/");
+          const res = await github.rest.repos.get({ owner, repo });
+          const isPrivate = res.data.private;
+          const hasGhas = res.data.security_and_analysis?.advanced_security?.status === 'enabled';
+          if (isPrivate && !hasGhas) {
+            core.warning('GHAS is NOT enabled and repo is private. Cannot upload SARIF.');
+            return false;
           }
-          return true
+          return true;
 
-    - name: Convert output to Sarif for codescanning
-      env:
-        OUTPUT-FILE: ${{ inputs.output-file }}
-      if: fromJSON(steps.ghas-enabled.outputs.result)
+    - name: Convert to SARIF
+      if: fromJSON(steps.ghas-check.outputs.result)
       id: convert-sarif
       shell: bash
       run: |
-        trivy convert --format sarif --output ${{ env.OUTPUT-FILE }}.sarif ${{ env.TRIVY_OUTPUT }}
-        echo "sarif-file=${{ env.OUTPUT-FILE }}.sarif" >> $GITHUB_OUTPUT
-    
-    - name: Upload Trivy scan results to GitHub Security tab
-      if: fromJSON(steps.ghas-enabled.outputs.result)
-      id: upload
+        trivy convert --format sarif --output ${{ inputs.output-file }}.sarif ${{ inputs.output-file }}.json
+        echo "sarif=${{ inputs.output-file }}.sarif" >> $GITHUB_OUTPUT
+
+    - name: Upload SARIF to Security Tab
+      if: fromJSON(steps.ghas-check.outputs.result)
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: ${{ steps.convert-sarif.outputs.sarif-file }}
+        sarif_file: ${{ steps.convert-sarif.outputs.sarif }}
         category: ${{ inputs.scan-type }}-${{ inputs.scan-ref != '' && inputs.scan-ref || inputs.image-ref }}
