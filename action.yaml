@@ -86,7 +86,7 @@ runs:
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.report-name.outputs.name }}-${{ runner.name }}-${{ inputs.scan-type }}-trivy
+        name: ${{ steps.report-name.outputs.name }}-${{ github.run_id }}-job-${{ github.job }}-${{ inputs.scan-type }}-trivy
         path: ${{ inputs.output-file }}.json
 
     - name: Convert Report to Text
