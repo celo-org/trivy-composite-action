@@ -47,6 +47,9 @@ runs:
         elif [[ "${{ inputs.scan-type }}" == "fs" && -z "${{ inputs.scan-ref }}" ]]; then
           echo "::error::scan-type=fs requires scan-ref"
           exit 1
+        elif [[ "${{ inputs.scan-type }}" != "image" && "${{ inputs.scan-type }}" != "fs" ]]; then
+          echo "::error::scan-type must be either 'image' or 'fs'"
+          exit 1
         fi
 
     - name: Run Trivy Scan
