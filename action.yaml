@@ -78,11 +78,7 @@ runs:
           basename="${IMAGE##*/}"
           stripped_name="${basename%:*}"
         else 
-          workdir=$(pwd)
           basename="${SCAN_REF##*/}"
-          if [[ "$basename" == "." ]]; then
-            basename="$(basename $workdir)"
-          fi
           stripped_name="$basename"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
@@ -90,7 +86,7 @@ runs:
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy
+        name: ${{ steps.report-name.outputs.name }}-${{ github.job }}-${{ inputs.scan-type }}-trivy
         path: ${{ inputs.output-file }}.json
 
     - name: Convert Report to Text
