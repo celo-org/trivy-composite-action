@@ -76,8 +76,7 @@ runs:
       run: |
         if [ -n "$IMAGE" ]; then
           basename="${IMAGE##*/}"
-          random_id=$(openssl rand -hex 6)
-          stripped_name="${basename%:*}-${random_id}"
+          stripped_name="${basename%:*}-${basename##*:}"
         else 
           basename="${SCAN_REF##*/}"
           random_id=$(openssl rand -hex 6)
