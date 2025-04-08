@@ -76,11 +76,12 @@ runs:
       run: |
         if [ -n "$IMAGE" ]; then
           basename="${IMAGE##*/}"
-          stripped_name="${basename%:*}"
+          random_id=$(openssl rand -hex 6)
+          stripped_name="${basename%:*}-${random_id}"
         else 
           basename="${SCAN_REF##*/}"
-          RANDOM_ID=$(uuidgen)
-          stripped_name="${basename}-${RANDOM_ID}"
+          random_id=$(openssl rand -hex 6)
+          stripped_name="${basename}-${random_id}"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
