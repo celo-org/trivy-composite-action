@@ -79,14 +79,15 @@ runs:
           stripped_name="${basename%:*}"
         else 
           basename="${SCAN_REF##*/}"
-          stripped_name="$basename"
+          RANDOM_ID=$(uuidgen)
+          stripped_name="${basename}-${RANDOM_ID}"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.report-name.outputs.name }}-${{ github.run_id }}-job-${{ github.job }}-${{ inputs.scan-type }}-trivy
+        name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy
         path: ${{ inputs.output-file }}.json
 
     - name: Convert Report to Text
@@ -107,6 +108,7 @@ runs:
         echo "Scan Type: ${{ inputs.scan-type }}" >> $REPORT_FILE
         TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
         echo "Target: $TARGET" >> $REPORT_FILE
+        echo "Report Artifact Name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy" >> $REPORT_FILE
         echo "<details><summary>Click to expand</summary>" >> $REPORT_FILE
         echo "" >> $REPORT_FILE
         echo '```' >> $REPORT_FILE
