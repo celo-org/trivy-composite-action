@@ -78,7 +78,7 @@ runs:
           basename="${IMAGE##*/}"
           stripped_name="${basename%:*}-${basename##*:}"
         else 
-	  if [ "$SCAN_REF" eq "."]; then
+          if [ "$SCAN_REF" eq "."]; then
             SCAN_REF = $(pwd)
           basename="${SCAN_REF##*/}"
           random_id=$(openssl rand -hex 6)
