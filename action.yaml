@@ -79,7 +79,7 @@ runs:
           stripped_name="${basename%:*}-${basename##*:}"
         else 
           if [ "$SCAN_REF" == "."]; then
-            SCAN_REF = $(pwd)
+            SCAN_REF=$(pwd)
           fi
           basename="${SCAN_REF##*/}"
           random_id=$(openssl rand -hex 6)
