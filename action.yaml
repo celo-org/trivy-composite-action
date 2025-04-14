@@ -80,6 +80,7 @@ runs:
         else 
           if [ "$SCAN_REF" eq "."]; then
             SCAN_REF = $(pwd)
+          fi
           basename="${SCAN_REF##*/}"
           random_id=$(openssl rand -hex 6)
           stripped_name="${basename}-${random_id}"
