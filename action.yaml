@@ -79,7 +79,7 @@ runs:
           stripped_name="${basename%:*}-${basename##*:}"
         else 
           echo "scan_ref is $SCAN_REF"
-          if [ "$SCAN_REF" == "."]; then
+          if [ "$SCAN_REF" == "." ]; then
             SCAN_REF="test"
           fi
           basename="${SCAN_REF##*/}"
