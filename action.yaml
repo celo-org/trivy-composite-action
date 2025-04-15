@@ -75,7 +75,7 @@ runs:
       shell: bash
       run: |
         if [ -n "$IMAGE" ]; then
-          basename="${IMAGE##*/}"
+          basename="$(basename $IMAGE)"
           stripped_name="${basename%:*}-${basename##*:}"
         else 
           echo "scan_ref is $SCAN_REF"
