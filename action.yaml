@@ -103,7 +103,7 @@ runs:
         echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
 
     - name: Build Report for PR and Summary
-      if: ${{ inputs.summary || inputs.pr-comment }}
+      if: ${{ inputs.summary || inputs.pr-comment }} && steps.convert-text.outputs.text != ''
       id: build-report
       shell: bash
       run: |
