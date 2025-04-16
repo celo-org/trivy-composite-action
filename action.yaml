@@ -100,7 +100,9 @@ runs:
       shell: bash
       run: |
         trivy convert --format table --output ${{ inputs.output-file }}.txt ${{ inputs.output-file }}.json
-        echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
+        if [ -s "$FILE" ]; then
+          echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
+        fi
 
     - name: Build Report for PR and Summary
       if: ${{ inputs.summary || inputs.pr-comment }} && steps.convert-text.outputs.text != ''
