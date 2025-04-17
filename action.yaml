@@ -105,13 +105,10 @@ runs:
 
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
         
-        echo "File size: $(stat -c%s trivy.txt)"
-        echo "File content:"
-        cat -A trivy.txt
         if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
-          echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
         else
+          echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
         echo "File is empty."
         fi
 
