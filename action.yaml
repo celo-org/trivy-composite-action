@@ -102,8 +102,13 @@ runs:
         json-file: ${{ inputs.output-file }}.json
       shell: bash
       run: |
+
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
+        ls -l trivy.txt
+        cat -A trivy.txt
         if [ -s ${{ env.text-file }} ]; then
+          echo "File is not empty. Content:"
+          cat trivy.txt
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         fi
 
