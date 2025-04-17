@@ -100,7 +100,7 @@ runs:
       shell: bash
       run: |
         trivy convert --format table --output ${{ inputs.output-file }}.txt ${{ inputs.output-file }}.json
-        if [ -s ${{ inputs.output-file }} ]; then
+        if [ -s ${{ inputs.output-file }}.txt ]; then
           echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
         fi
 
