@@ -97,11 +97,14 @@ runs:
     - name: Convert Report to Text
       if: ${{ inputs.summary || inputs.pr-comment }}
       id: convert-text
+      env:
+        text-file: ${{ inputs.output-file}}.txt
+        json-file: ${{ inputs.output-file }}.json
       shell: bash
       run: |
-        trivy convert --format table --output ${{ inputs.output-file }}.txt ${{ inputs.output-file }}.json
-        if [ -s ${{ inputs.output-file }}.txt ]; then
-          echo "text=${{ inputs.output-file }}.txt" >> $GITHUB_OUTPUT
+        trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
+        if [ -s ${{ env.text-file }} ]; then
+          echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         fi
 
     - name: Build Report for PR and Summary
