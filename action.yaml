@@ -105,7 +105,7 @@ runs:
         fi
 
     - name: Build Report for PR and Summary
-      if: ${{ inputs.summary || inputs.pr-comment }} && steps.convert-text.outputs.text != ''
+      if: steps.convert-text.outputs.text != '' && (${{ inputs.summary || inputs.pr-comment }})
       id: build-report
       shell: bash
       run: |
