@@ -104,13 +104,16 @@ runs:
       run: |
 
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
-        ls -l trivy.txt
+        
+        echo "File size: $(stat -c%s trivy.txt)"
+        echo "File content:"
         cat -A trivy.txt
-        if [ -s ${{ env.text-file }} ]; then
-          echo "File is not empty. Content:"
-          cat trivy.txt
+        if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
+        else
+        echo "File is empty."
         fi
+
 
     - name: Build Report for PR and Summary
       if: steps.convert-text.outputs.text != '' && (${{ inputs.summary || inputs.pr-comment }})
