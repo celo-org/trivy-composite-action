@@ -109,7 +109,6 @@ runs:
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         else
           echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
-        echo "File is empty."
         fi
 
     - name: Build Report for PR and Summary
