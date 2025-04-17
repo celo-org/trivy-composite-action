@@ -110,13 +110,13 @@ runs:
         cat -A trivy.txt
         if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
+          echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
         else
         echo "File is empty."
         fi
 
-
     - name: Build Report for PR and Summary
-      if: steps.convert-text.outputs.text != '' && (${{ inputs.summary || inputs.pr-comment }})
+      if: steps.convert-text.outputs.text != '' && (inputs.summary || inputs.pr-comment)
       id: build-report
       shell: bash
       run: |
