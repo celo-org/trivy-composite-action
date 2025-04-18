@@ -136,7 +136,7 @@ runs:
       if: ${{ inputs.pr-comment }}
       uses: mshick/add-pr-comment@v2
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        repo-token: github.token
         comment: |
           ### Trivy Scan Results
           
