@@ -58,13 +58,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Cache Trivy Database
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/trivy
-        key: ${{ runner.os }}-trivy-${{ github.run_id }}-${{ github.job }}
-        restore-keys: |
-          ${{ runner.os }}-trivy-${{ github.run_id }}-${{ github.job }}
 
     - name: Validate Required Inputs
       shell: bash
@@ -111,6 +104,7 @@ runs:
         output: ${{ inputs.output-file }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         ignore-unfixed: ${{ inputs.ignore-unfixed }}
+        cache: true
 
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
