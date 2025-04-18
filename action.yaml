@@ -37,9 +37,6 @@ inputs:
 
 runs:
   using: "composite"
-  permissions:
-    contents: read  # Required for reading repo contents
-    security-events: write  # Required for uploading SARIF files to the Security tab
   steps:
     - name: Validate Required Inputs
       shell: bash
