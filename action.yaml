@@ -37,10 +37,14 @@ inputs:
 
 runs:
   using: "composite"
+  permissions:
+    contents: read  # Required for reading repo contents
+    security-events: write  # Required for uploading SARIF files to the Security tab
   steps:
     - name: Validate Required Inputs
       shell: bash
       run: |
+        # Ensure required inputs are provided based on scan type
         if [[ "${{ inputs.scan-type }}" == "image" && -z "${{ inputs.image-ref }}" ]]; then
           echo "::error::scan-type=image requires image-ref"
           exit 1
@@ -54,7 +58,7 @@ runs:
 
     - name: Run Trivy Scan
       id: trivy
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@v0.11.1  # Pin to a specific version for stability
       with:
         scan-type: ${{ inputs.scan-type }}
         image-ref: ${{ inputs.image-ref }}
@@ -74,11 +78,11 @@ runs:
         SCAN_REF: ${{ inputs.scan-ref }}
       shell: bash
       run: |
+        # Generate a unique report name based on the scan target
         if [ -n "$IMAGE" ]; then
           basename="$(basename $IMAGE)"
           stripped_name="${basename%:*}-${basename##*:}"
         else 
-          echo "scan_ref is $SCAN_REF"
           if [ "$SCAN_REF" == "." ]; then
             SCAN_REF=$(pwd)
           fi
@@ -94,21 +98,53 @@ runs:
         name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy
         path: ${{ inputs.output-file }}.json
 
+    - name: Check if GHAS is Enabled
+      uses: actions/github-script@v7
+      id: ghas-check
+      with:
+        script: |
+          // Check if GitHub Advanced Security (GHAS) is enabled for private repositories
+          const [owner, repo] = '${{ github.repository }}'.split("/");
+          const res = await github.rest.repos.get({ owner, repo });
+          const isPrivate = res.data.private;
+          const hasGhas = res.data.security_and_analysis?.advanced_security?.status === 'enabled';
+          if (isPrivate && !hasGhas) {
+            core.warning('GHAS is NOT enabled and repo is private. Cannot upload SARIF.');
+            return false;
+          }
+          return true;
+
+    - name: Convert to SARIF
+      if: fromJSON(steps.ghas-check.outputs.result)
+      id: convert-sarif
+      shell: bash
+      run: |
+        # Convert JSON report to SARIF format for integration with GitHub Security tab
+        trivy convert --format sarif --output ${{ inputs.output-file }}.sarif ${{ inputs.output-file }}.json
+        echo "sarif=${{ inputs.output-file }}.sarif" >> $GITHUB_OUTPUT
+
+    - name: Upload SARIF to Security Tab
+      if: fromJSON(steps.ghas-check.outputs.result)
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.convert-sarif.outputs.sarif }}
+        category: ${{ inputs.scan-type }}-${{ inputs.scan-ref != '' && inputs.scan-ref || inputs.image-ref }}
+
     - name: Convert Report to Text
       if: ${{ inputs.summary || inputs.pr-comment }}
       id: convert-text
       env:
-        text-file: ${{ inputs.output-file}}.txt
+        text-file: ${{ inputs.output-file }}.txt
         json-file: ${{ inputs.output-file }}.json
       shell: bash
       run: |
-
+        # Convert JSON report to a human-readable text format
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
         
         if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         else
-          echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
+          echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output if empty
         fi
 
     - name: Build Report for PR and Summary
@@ -116,6 +152,7 @@ runs:
       id: build-report
       shell: bash
       run: |
+        # Generate a summary report for PR comments or workflow summary
         REPORT_FILE="report.txt"
         echo "Trivy Scan Output" > $REPORT_FILE
         echo "Scan Type: ${{ inputs.scan-type }}" >> $REPORT_FILE
@@ -143,34 +180,5 @@ runs:
       if: ${{ inputs.summary && steps.build-report.outputs.report != '' }}
       shell: bash
       run: |
+        # Append the scan report to the GitHub workflow summary
         cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
-
-    - name: Check if GHAS is Enabled
-      uses: actions/github-script@v7
-      id: ghas-check
-      with:
-        script: |
-          const [owner, repo] = '${{ github.repository }}'.split("/");
-          const res = await github.rest.repos.get({ owner, repo });
-          const isPrivate = res.data.private;
-          const hasGhas = res.data.security_and_analysis?.advanced_security?.status === 'enabled';
-          if (isPrivate && !hasGhas) {
-            core.warning('GHAS is NOT enabled and repo is private. Cannot upload SARIF.');
-            return false;
-          }
-          return true;
-
-    - name: Convert to SARIF
-      if: fromJSON(steps.ghas-check.outputs.result)
-      id: convert-sarif
-      shell: bash
-      run: |
-        trivy convert --format sarif --output ${{ inputs.output-file }}.sarif ${{ inputs.output-file }}.json
-        echo "sarif=${{ inputs.output-file }}.sarif" >> $GITHUB_OUTPUT
-
-    - name: Upload SARIF to Security Tab
-      if: fromJSON(steps.ghas-check.outputs.result)
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: ${{ steps.convert-sarif.outputs.sarif }}
-        category: ${{ inputs.scan-type }}-${{ inputs.scan-ref != '' && inputs.scan-ref || inputs.image-ref }}
