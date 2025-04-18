@@ -2,6 +2,10 @@ name: Trivy
 description: "Run a Trivy Scan and generate reports"
 
 inputs:
+  github-token:
+    description: "GitHub Token for posting comments"
+    required: true
+    type: string
   scan-type:
     description: "Type of scan: image or fs (filesystem)"
     required: true
@@ -140,7 +144,7 @@ runs:
     - name: Post Results as PR Comment
       if: ${{ inputs.pr-comment }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         JSON_FILE: ${{ inputs.output-file }}.json
       shell: bash
       run: |
