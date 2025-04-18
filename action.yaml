@@ -25,7 +25,6 @@ inputs:
     description: "Comma-separated list of severity levels (UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL)"
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
-    enum: [UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL]
   output-file:
     description: "Base name for the output files"
     default: "trivy"
