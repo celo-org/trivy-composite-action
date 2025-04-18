@@ -55,7 +55,7 @@ runs:
 
     - name: Run Trivy Scan
       id: trivy
-      uses: aquasecurity/trivy-action@v0.30.0  # Pin to a specific version for stability
+      uses: aquasecurity/trivy-action@0.30.0  # Pin to a specific version for stability
       with:
         scan-type: ${{ inputs.scan-type }}
         image-ref: ${{ inputs.image-ref }}
