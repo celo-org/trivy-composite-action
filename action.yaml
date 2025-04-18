@@ -6,6 +6,7 @@ inputs:
     description: "Type of scan: image or fs (filesystem)"
     required: true
     type: string
+    enum: [image, fs]
   image-ref:
     description: "Image to scan (required if scan-type is image)"
     type: string
@@ -24,6 +25,7 @@ inputs:
     description: "Comma-separated list of severity levels (UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL)"
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
+    enum: [UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL]
   output-file:
     description: "Base name for the output files"
     default: "trivy"
