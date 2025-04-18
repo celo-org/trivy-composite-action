@@ -89,6 +89,11 @@ runs:
           stripped_name="${basename}-$(openssl rand -hex 6)"
         fi
         echo "name=${stripped_name}-${GITHUB_RUN_ID}" >> $GITHUB_OUTPUT
+    - name: Manual Trivy Setup
+      uses: aquasecurity/setup-trivy@v0.2.0
+      with:
+        cache: true
+        version: v0.60.1
 
     - name: Run Trivy Scan
       id: trivy-scan
@@ -104,7 +109,6 @@ runs:
         output: ${{ inputs.output-file }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         ignore-unfixed: ${{ inputs.ignore-unfixed }}
-        cache: true
 
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
