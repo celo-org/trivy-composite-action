@@ -134,27 +134,14 @@ runs:
 
     - name: Post Results as PR Comment
       if: ${{ inputs.pr-comment }}
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-        JSON_FILE: ${{ inputs.output-file }}.json
-      shell: bash
-      run: |
-        # Debugging: Output the contents of the JSON file
-        echo "Debugging: Contents of $JSON_FILE"
-        cat $JSON_FILE || echo "File $JSON_FILE does not exist or is empty"
-
-        # Prepare the comment body
-        comment_body="### Trivy Scan Results\n"
-        comment_body+="\n**Scan Type**: ${{ inputs.scan-type }}"
-        comment_body+="\n**Severity Levels**: ${{ inputs.severity }}"
-        comment_body+="\n\n#### Vulnerabilities Found:\n"
-
-        # Check for null or empty 'Vulnerabilities' field
-        if jq -e '.Vulnerabilities | length > 0' $JSON_FILE > /dev/null 2>&1; then
-          comment_body+="\n\`\`\`json\n$(jq -r '.Vulnerabilities[] | {Severity, VulnerabilityID, PkgName}' $JSON_FILE)\n\`\`\`"
-        else
-          comment_body+="\nNo vulnerabilities found or the JSON is invalid."
-        fi
-
-        # Post the comment
-        gh pr comment ${{ github.event.pull_request.number }} --body "${comment_body}"
+      uses: mshick/add-pr-comment@v2
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        comment: |
+          ### Trivy Scan Results
+          
+          **Scan Type**: ${{ inputs.scan-type }}
+          **Severity Levels**: ${{ inputs.severity }}
+          
+          #### Vulnerabilities Found:
+          ${{ steps.trivy-scan.outputs.vulnerabilities }}
