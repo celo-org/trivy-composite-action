@@ -41,7 +41,7 @@ inputs:
     type: boolean
   pr-comment:
     description: "Post results as a comment on the pull request"
-    default: true
+    default: false
     type: boolean
 
 outputs:
@@ -54,6 +54,9 @@ outputs:
   text-report:
     description: "Generated human-readable text report"
     value: ${{ steps.convert-text.outputs.text }}
+  json-report:
+    description: "Generated JSON report path"
+    value: ${{ inputs.output-file }}.json
 
 runs:
   using: "composite"
@@ -140,6 +143,9 @@ runs:
         JSON_FILE: ${{ inputs.output-file }}.json
       shell: bash
       run: |
-        comment_body="### Trivy Scan Results\n\n"
-        comment_body+="$(jq -r '.Vulnerabilities[] | "- Severity: \(.Severity), ID: \(.VulnerabilityID), Package: \(.PkgName)"' $JSON_FILE)"
+        comment_body="### Trivy Scan Results\n"
+        comment_body+="\n**Scan Type**: ${{ inputs.scan-type }}"
+        comment_body+="\n**Severity Levels**: ${{ inputs.severity }}"
+        comment_body+="\n\n#### Vulnerabilities Found:\n"
+        comment_body+="\n\`\`\`json\n$(jq -r '.Vulnerabilities[] | {Severity, VulnerabilityID, PkgName}' $JSON_FILE)\n\`\`\`"
         gh pr comment ${{ github.event.pull_request.number }} --body "${comment_body}"
