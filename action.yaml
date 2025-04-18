@@ -36,10 +36,6 @@ inputs:
     description: "Ignore unfixed vulnerabilities"
     default: false
     type: boolean
-  offline-scan:
-    description: "Perform an offline scan without network access"
-    default: false
-    type: boolean
   pr-comment:
     description: "Post results as a comment on the pull request"
     default: false
@@ -115,7 +111,6 @@ runs:
         output: ${{ inputs.output-file }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         ignore-unfixed: ${{ inputs.ignore-unfixed }}
-        offline-scan: ${{ inputs.offline-scan }}
 
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
