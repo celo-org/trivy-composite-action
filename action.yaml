@@ -62,9 +62,9 @@ runs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/trivy
-        key: ${{ runner.os }}-trivy-db
+        key: ${{ runner.os }}-trivy-${{ github.run_id }}-${{ github.job }}
         restore-keys: |
-          ${{ runner.os }}-trivy-db
+          ${{ runner.os }}-trivy-${{ github.run_id }}-${{ github.job }}
 
     - name: Validate Required Inputs
       shell: bash
@@ -136,7 +136,7 @@ runs:
       if: ${{ inputs.pr-comment }}
       uses: mshick/add-pr-comment@v2
       with:
-        repo-token: github.token
+        repo-token: ${{ github.token }}
         comment: |
           ### Trivy Scan Results
           
