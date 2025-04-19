@@ -130,7 +130,7 @@ runs:
       uses: mshick/add-pr-comment@v2
       with:
         repo-token: ${{ github.token }}
-        comment: |
+        message: |
           ### Trivy Scan Results
           
           **Scan Type**: ${{ inputs.scan-type }}
