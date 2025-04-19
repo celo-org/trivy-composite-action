@@ -92,7 +92,7 @@ runs:
 
     - name: Run Trivy Scan
       id: trivy-scan
-      uses: aquasecurity/trivy-action@0.30.0
+      uses: aquasecurity/trivy-action@master
       with:
         scan-type: ${{ inputs.scan-type }}
         image-ref: ${{ inputs.image-ref }}
