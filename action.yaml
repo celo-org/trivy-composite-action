@@ -86,7 +86,7 @@ runs:
         vuln-type: ${{ inputs.vuln-type }}
         severity: ${{ inputs.severity }}
         format: json
-        output: ${{ steps.report-name.outputs.stripped_name }}.json
+        output: ${{ steps.report-name.outputs.name }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         skip-setup-trivy: ${{ inputs.skip-setup }}
 
