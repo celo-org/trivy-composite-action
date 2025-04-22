@@ -142,7 +142,6 @@ runs:
         message-path: ${{ steps.build-report.outputs.report }}
 
     - name: Convert to SARIF
-      if: fromJSON(steps.ghas-check.outputs.result)
       id: convert-sarif
       shell: bash
       run: |
