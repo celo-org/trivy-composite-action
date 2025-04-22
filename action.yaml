@@ -21,8 +21,6 @@ inputs:
   severity:
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
-  output-file:
-    default: "trivy"
   pr-comment:
     default: true
     type: boolean
@@ -56,21 +54,6 @@ runs:
           exit 1
         fi
 
-    - name: Run Trivy Scan
-      id: trivy
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: ${{ inputs.scan-type }}
-        image-ref: ${{ inputs.image-ref }}
-        scan-ref: ${{ inputs.scan-ref }}
-        timeout: ${{ inputs.timeout }}
-        vuln-type: ${{ inputs.vuln-type }}
-        severity: ${{ inputs.severity }}
-        format: json
-        output: ${{ inputs.output-file }}.json
-        skip-dirs: ${{ inputs.skip-dirs }}
-        skip-setup-trivy: ${{ inputs.skip-setup }}
-
     - name: Derive Report Name
       id: report-name
       env:
@@ -92,18 +75,34 @@ runs:
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
+    - name: Run Trivy Scan
+      id: trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        image-ref: ${{ inputs.image-ref }}
+        scan-ref: ${{ inputs.scan-ref }}
+        timeout: ${{ inputs.timeout }}
+        vuln-type: ${{ inputs.vuln-type }}
+        severity: ${{ inputs.severity }}
+        format: json
+        output: ${{ steps.report-name.outputs.stripped_name }}.json
+        skip-dirs: ${{ inputs.skip-dirs }}
+        skip-setup-trivy: ${{ inputs.skip-setup }}
+
+
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy
-        path: ${{ inputs.output-file }}.json
+        path: ${{ steps.report-name.outputs.name  }}.json
 
     - name: Convert Report to Text
       if: ${{ inputs.summary || inputs.pr-comment }}
       id: convert-text
       env:
-        text-file: ${{ inputs.output-file}}.txt
-        json-file: ${{ inputs.output-file }}.json
+        text-file: ${{ steps.report-name.outputs.name }}.txt
+        json-file: ${{ steps.report-name.outputs.name }}.json
       shell: bash
       run: |
 
@@ -139,7 +138,6 @@ runs:
       uses: mshick/add-pr-comment@v2
       with:
         allow-repeats: true
-        repo-token: ${{ github.token }}
         message-id: Trivy Scan
         message-path: ${{ steps.build-report.outputs.report }}
 
