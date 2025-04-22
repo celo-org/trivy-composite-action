@@ -1,4 +1,4 @@
-name: Trivy
+build-report.outputs.reportame: Trivy
 description: "Run a Trivy Scan and upload the results"
 
 inputs:
@@ -23,9 +23,6 @@ inputs:
     type: string
   output-file:
     default: "trivy"
-  summary:
-    default: true
-    type: boolean
   pr-comment:
     default: true
     type: boolean
@@ -35,6 +32,13 @@ inputs:
     default: false
     type: boolean
 
+outputs:
+  text-report:
+    description: "text report of trivy scan"
+    value: steps.build-report.outputs.report
+  sarif-file:
+    description: "sarif report from trivy scan"
+    value: steps.convert-sarif.outputs.sarif
 runs:
   using: "composite"
   steps:
@@ -112,7 +116,7 @@ runs:
         fi
 
     - name: Build Report for PR and Summary
-      if: steps.convert-text.outputs.text != '' && (inputs.summary || inputs.pr-comment)
+      if: steps.convert-text.outputs.text != ''
       id: build-report
       shell: bash
       run: |
@@ -139,27 +143,6 @@ runs:
         message-id: Trivy Scan
         message-path: ${{ steps.build-report.outputs.report }}
 
-    - name: Add Report to Workflow Summary
-      if: ${{ inputs.summary && steps.build-report.outputs.report != '' }}
-      shell: bash
-      run: |
-        cat ${{ steps.build-report.outputs.report }} >> $GITHUB_STEP_SUMMARY
-
-    - name: Check if GHAS is Enabled
-      uses: actions/github-script@v7
-      id: ghas-check
-      with:
-        script: |
-          const [owner, repo] = '${{ github.repository }}'.split("/");
-          const res = await github.rest.repos.get({ owner, repo });
-          const isPrivate = res.data.private;
-          const hasGhas = res.data.security_and_analysis?.advanced_security?.status === 'enabled';
-          if (isPrivate && !hasGhas) {
-            core.warning('GHAS is NOT enabled and repo is private. Cannot upload SARIF.');
-            return false;
-          }
-          return true;
-
     - name: Convert to SARIF
       if: fromJSON(steps.ghas-check.outputs.result)
       id: convert-sarif
@@ -168,9 +151,4 @@ runs:
         trivy convert --format sarif --output ${{ inputs.output-file }}.sarif ${{ inputs.output-file }}.json
         echo "sarif=${{ inputs.output-file }}.sarif" >> $GITHUB_OUTPUT
 
-    - name: Upload SARIF to Security Tab
-      if: fromJSON(steps.ghas-check.outputs.result)
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: ${{ steps.convert-sarif.outputs.sarif }}
-        category: ${{ inputs.scan-type }}-${{ inputs.scan-ref != '' && inputs.scan-ref || inputs.image-ref }}
+
