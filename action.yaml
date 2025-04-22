@@ -145,7 +145,7 @@ runs:
       id: convert-sarif
       shell: bash
       run: |
-        trivy convert --format sarif --output ${{ inputs.output-file }}.sarif ${{ inputs.output-file }}.json
+        trivy convert --format sarif --output ${{ steps.report-name.outputs.name }}.sarif ${{ steps.report-name.outputs.name }}.json
         echo "sarif=${{ inputs.output-file }}.sarif" >> $GITHUB_OUTPUT
 
 
