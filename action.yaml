@@ -134,7 +134,7 @@ runs:
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
 
     - name: Post Scan Results to GitHub PR
-      if: github.event_name == 'pull_request' && inputs.pr-comment == 'true' && (steps.build-report.outputs.report != '')
+      if: github.event_name == 'pull_request' && inputs.pr-comment && (steps.build-report.outputs.report != '')
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
