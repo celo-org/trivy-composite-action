@@ -97,7 +97,7 @@ runs:
         path: ${{ steps.report-name.outputs.name  }}.json
 
     - name: Convert Report to Text
-      if: ${{ inputs.summary || inputs.pr-comment }}
+      if: ${{ inputs.pr-comment }}
       id: convert-text
       env:
         text-file: ${{ steps.report-name.outputs.name }}.txt
@@ -136,11 +136,9 @@ runs:
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment == true && steps.build-report.outputs.report != ''
-      uses: mshick/add-pr-comment@v2
+      uses: peter-evans/create-or-update-comment@v4
       with:
-        allow-repeats: true
-        message-id: Trivy Scan
-        message-path: ${{ steps.build-report.outputs.report }}
+        body-path: ${{ steps.build-report.outputs.report }}
 
     - name: Convert to SARIF
       id: convert-sarif
