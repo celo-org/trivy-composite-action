@@ -137,6 +137,7 @@ runs:
       if: github.event_name == 'pull_request' && inputs.pr-comment == 'true' && (steps.build-report.outputs.report != '')
       uses: peter-evans/create-or-update-comment@v4
       with:
+        issue-number: ${{ github.event.pull_request.number }}
         body-path: ${{ steps.build-report.outputs.report }}
 
     - name: Convert to SARIF
