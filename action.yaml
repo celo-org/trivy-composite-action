@@ -135,6 +135,7 @@ runs:
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report == '')
+      shell: bash
       run: |
         exit 1
 
