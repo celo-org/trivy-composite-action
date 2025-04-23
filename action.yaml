@@ -116,12 +116,8 @@ runs:
         trivy convert --format table --output "${{ env.TEXT_REPORT_FILE }}" "${{ env.JSON_REPORT_FILE }}"
         
         # Check if the text file was successfully created and has content
-        if [ ! -f "${{ env.TEXT_REPORT_FILE }}" ]; then
-          echo "::error::Failed to create the text report file."
-          exit 1
-        elif [ "$(stat -c%s "${{ env.TEXT_REPORT_FILE }}")" -eq 0 ]; then
-          echo "::error::The text report file is empty."
-          exit 1
+        if [ "$(stat -c%s "${{ env.TEXT_REPORT_FILE }}")" -eq 0 ]; then
+          echo "text="
         else
           echo "text=${{ env.TEXT_REPORT_FILE }}" >> $GITHUB_OUTPUT
         fi
