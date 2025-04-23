@@ -108,10 +108,8 @@ runs:
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
         
         if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
-          echo "111111"
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         else
-          echo "222222"
           echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
         fi
 
@@ -134,12 +132,6 @@ runs:
         echo '```' >> ${{ env.REPORT_FILE }}
         echo "</details>" >> ${{ env.REPORT_FILE }}
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
-
-    - name: Debug Inputs and Outputs
-      shell: bash
-      if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report == '')
-      run: |
-        exit 1      
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report != '')
