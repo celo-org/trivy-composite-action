@@ -33,10 +33,10 @@ inputs:
 outputs:
   text-report:
     description: "text report of trivy scan"
-    value: steps.build-report.outputs.report
+    value: ${{ steps.build-report.outputs.report }}
   sarif-file:
     description: "sarif report from trivy scan"
-    value: steps.convert-sarif.outputs.sarif
+    value: ${{ steps.convert-sarif.outputs.sarif }} 
 runs:
   using: "composite"
   steps:
