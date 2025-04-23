@@ -63,15 +63,14 @@ runs:
       run: |
         if [ -n "$IMAGE" ]; then
           basename="$(basename $IMAGE)"
-          stripped_name="${basename%:*}-${basename##*:}"
+          stripped_name="${basename%:*}-${basename##*:}-${{ github.run_id }}"
         else 
           echo "scan_ref is $SCAN_REF"
           if [ "$SCAN_REF" == "." ]; then
             SCAN_REF=$(pwd)
           fi
           basename="$(basename $SCAN_REF)"
-          random_id=$(openssl rand -hex 6)
-          stripped_name="${basename}-${random_id}"
+          stripped_name="${basename}-${{ github.run_id }}"
         fi
         echo "name=$stripped_name" >> $GITHUB_OUTPUT
 
