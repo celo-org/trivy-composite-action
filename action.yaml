@@ -108,10 +108,10 @@ runs:
         trivy convert --format table --output ${{ env.text-file }} ${{ env.json-file }}
         
         if [ "$(stat -c%s ${{ env.text-file }})" -gt 0 ]; then
-	  echo "111111"
+          echo "111111"
           echo "text=${{ env.text-file }}" >> $GITHUB_OUTPUT
         else
-	  echo "222222"
+          echo "222222"
           echo "text=" >> $GITHUB_OUTPUT  # Explicitly unset the output
         fi
 
