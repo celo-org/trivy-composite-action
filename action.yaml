@@ -137,7 +137,7 @@ runs:
 
 
     - name: Post Scan Results to GitHub PR
-      if: github.event_name == 'pull_request' && inputs.pr-comment == true && steps.build-report.outputs.report != ''
+      if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report != '')
       uses: peter-evans/create-or-update-comment@v4
       with:
         body-path: ${{ steps.build-report.outputs.report }}
