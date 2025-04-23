@@ -137,7 +137,7 @@ runs:
 
     - name: Debug Inputs and Outputs
       shell: bash
-      if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report != '')
+      if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report == '')
       run: |
         exit 1      
 
