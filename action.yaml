@@ -108,8 +108,8 @@ runs:
       if: ${{ inputs.pr-comment }}
       id: convert-text
       env:
-        TEXT_REPORT_FILE: ${{ steps.report-name.outputs.name }}.txt
-        JSON_REPORT_FILE: ${{ steps.report-name.outputs.name }}.json
+        TEXT_REPORT_FILE: ${{ steps.report-name.outputs.report_filename }}.txt
+        JSON_REPORT_FILE: ${{ steps.report-name.outputs.report_filename }}.json
       shell: bash
       run: |
         # Convert the JSON report to a text table using Trivy
