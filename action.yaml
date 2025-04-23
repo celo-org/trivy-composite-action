@@ -137,10 +137,9 @@ runs:
 
     - name: Debug Inputs and Outputs
       shell: bash
+      if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report != '')
       run: |
-        echo "Event Name: ${{ github.event_name }}"
-        echo "PR Comment: ${{ inputs.pr-comment }}"
-        echo "Build Report Output: ${{ steps.build-report.outputs.report }}"
+        exit 1      
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment == true && (steps.build-report.outputs.report != '')
