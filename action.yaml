@@ -119,20 +119,22 @@ runs:
       if: steps.convert-text.outputs.text != ''
       id: build-report
       shell: bash
+      env:
+        REPORT_FILE: "report.txt"
       run: |
-        REPORT_FILE="report.txt"
-        echo "Trivy Scan Output" > $REPORT_FILE
-        echo "Scan Type: ${{ inputs.scan-type }}" >> $REPORT_FILE
+        echo "Trivy Scan Output" > ${{ env.REPORT_FILE }}
+        echo "Scan Type: ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
         TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
-        echo "Target: $TARGET" >> $REPORT_FILE
-        echo "Report Artifact Name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy" >> $REPORT_FILE
-        echo "<details><summary>Click to expand</summary>" >> $REPORT_FILE
-        echo "" >> $REPORT_FILE
-        echo '```' >> $REPORT_FILE
-        cat ${{ steps.convert-text.outputs.text }} >> $REPORT_FILE
-        echo '```' >> $REPORT_FILE
-        echo "</details>" >> $REPORT_FILE
-        echo "report=$REPORT_FILE" >> $GITHUB_OUTPUT
+        echo "Target: $TARGET" >> ${{ env.REPORT_FILE }}
+        echo "Report Artifact Name: ${{ steps.report-name.outputs.name }}-${{ inputs.scan-type }}-trivy" >> ${{ env.REPORT_FILE }}
+        echo "<details><summary>Click to expand</summary>" >> ${{ env.REPORT_FILE }}
+        echo "" >> ${{ env.REPORT_FILE }}
+        echo '```' >> ${{ env.REPORT_FILE }}
+        cat ${{ steps.convert-text.outputs.text }} >> ${{ env.REPORT_FILE }}
+        echo '```' >> ${{ env.REPORT_FILE }}
+        echo "</details>" >> ${{ env.REPORT_FILE }}
+        echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
+
 
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment == true && steps.build-report.outputs.report != ''
