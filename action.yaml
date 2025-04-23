@@ -92,7 +92,7 @@ runs:
         vuln-type: ${{ inputs.vuln-type }}
         severity: ${{ inputs.severity }}
         format: json
-        output: ${{ steps.report-name.outputs.report_filename }}.json
+        output: ${{ steps.derive-report-name.outputs.report_filename }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         skip-setup-trivy: ${{ inputs.skip-setup }}
 
@@ -100,16 +100,16 @@ runs:
     - name: Upload JSON Report
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy
-        path: ${{ steps.report-name.outputs.report_filename  }}.json
+        name: ${{ steps.derive-report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy
+        path: ${{ steps.derive-report-name.outputs.report_filename  }}.json
 
     - name: Convert Report to Text
       # Convert the JSON report into a text format for easier readability
       if: ${{ inputs.pr-comment }}
       id: convert-text
       env:
-        TEXT_REPORT_FILE: ${{ steps.report-name.outputs.report_filename }}.txt
-        JSON_REPORT_FILE: ${{ steps.report-name.outputs.report_filename }}.json
+        TEXT_REPORT_FILE: ${{ steps.derive-report-name.outputs.report_filename }}.txt
+        JSON_REPORT_FILE: ${{ steps.derive-report-name.outputs.report_filename }}.json
       shell: bash
       run: |
         # Convert the JSON report to a text table using Trivy
@@ -137,7 +137,7 @@ runs:
         echo "Scan Type: ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
         TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
         echo "Target: $TARGET" >> ${{ env.REPORT_FILE }}
-        echo "Report Artifact Name: ${{ steps.report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy" >> ${{ env.REPORT_FILE }}
+        echo "Report Artifact Name: ${{ steps.derive-report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy" >> ${{ env.REPORT_FILE }}
         echo "<details><summary>Click to expand</summary>" >> ${{ env.REPORT_FILE }}
         echo "" >> ${{ env.REPORT_FILE }}
         echo '```' >> ${{ env.REPORT_FILE }}
@@ -159,20 +159,20 @@ runs:
       shell: bash
       run: |
         # Convert the JSON report to SARIF format using Trivy
-        trivy convert --format sarif --output "${{ steps.report-name.outputs.report_filename }}.sarif" "${{ steps.report-name.outputs.report_filename }}.json"
+        trivy convert --format sarif --output "${{ steps.derive-report-name.outputs.report_filename }}.sarif" "${{ steps.derive-report-name.outputs.report_filename }}.json"
 
         # Check if the SARIF file was successfully created
-        if [ ! -f "${{ steps.report-name.outputs.report_filename }}.sarif" ]; then
+        if [ ! -f "${{ steps.derive-report-name.outputs.report_filename }}.sarif" ]; then
           echo "::error::Failed to create the SARIF report file."
           exit 1
         fi
 
         # Validate that the SARIF file is not empty
-        if [ "$(stat -c%s "${{ steps.report-name.outputs.report_filename }}.sarif")" -eq 0 ]; then
+        if [ "$(stat -c%s "${{ steps.derive-report-name.outputs.report_filename }}.sarif")" -eq 0 ]; then
           echo "::error::The SARIF report file is empty."
           exit 1
         fi
 
         # Set the SARIF file output
-        echo "sarif=${{ steps.report-name.outputs.report_filename }}.sarif" >> $GITHUB_OUTPUT
+        echo "sarif=${{ steps.derive-report-name.outputs.report_filename }}.sarif" >> $GITHUB_OUTPUT
 
