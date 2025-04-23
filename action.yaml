@@ -3,7 +3,7 @@ description: "Run a Trivy Scan and upload the results"
 
 inputs:
   scan-type:
-    description: Type of scan: image or filesystem.
+    description: "Type of scan: image or filesystem."
     required: true
     type: string
   image-ref:
