@@ -127,7 +127,7 @@ runs:
       id: build-report
       shell: bash
       env:
-        REPORT_FILE: "report.txt"
+        REPORT_FILE: "${{  inputs.scan-type  }}-report.txt"
       run: |
         echo "**Trivy Scan Type:** ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
         TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
@@ -138,7 +138,7 @@ runs:
         echo '```' >> ${{ env.REPORT_FILE }}
         cat ${{ steps.convert-text.outputs.text }} >> ${{ env.REPORT_FILE }}
         echo '```' >> ${{ env.REPORT_FILE }}
-        echo "</details>" > ${{ env.REPORT_FILE }}
+        echo "</details>" >> ${{ env.REPORT_FILE }}
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
 
     - name: Find Comment
@@ -179,4 +179,8 @@ runs:
         # Set the SARIF file output
         echo "sarif=${{ steps.derive-report-name.outputs.report_filename }}.sarif" >> $GITHUB_OUTPUT
 
-
+    - name: Delete report file
+      if: steps.build-report.outputs.report != ''
+      shell: bash
+      run: |
+        rm -rf ${{ steps.build-report.outputs.report }}
