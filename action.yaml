@@ -138,7 +138,7 @@ runs:
         echo '```' >> ${{ env.REPORT_FILE }}
         cat ${{ steps.convert-text.outputs.text }} >> ${{ env.REPORT_FILE }}
         echo '```' >> ${{ env.REPORT_FILE }}
-        echo "</details>" >> ${{ env.REPORT_FILE }}
+        echo "</details>" > ${{ env.REPORT_FILE }}
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
 
     - name: Find Comment
