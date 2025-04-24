@@ -141,18 +141,18 @@ runs:
         echo "</details>" >> ${{ env.REPORT_FILE }}
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
 
-    - name: Find Comment
-      uses: peter-evans/find-comment@v3
-      id: fc
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body-includes: Trivy Scan Type
-
+#    - name: Find Comment
+#      uses: peter-evans/find-comment@v3
+#      id: fc
+#      with:
+#        issue-number: ${{ github.event.pull_request.number }}
+#        body-includes: Trivy Scan Type
+#
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment && (steps.build-report.outputs.report != '')
       uses: peter-evans/create-or-update-comment@v4
       with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
+        #comment-id: ${{ steps.fc.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
         body-path: ${{ steps.build-report.outputs.report }}
         
