@@ -178,9 +178,3 @@ runs:
 
         # Set the SARIF file output
         echo "sarif=${{ steps.derive-report-name.outputs.report_filename }}.sarif" >> $GITHUB_OUTPUT
-
-    - name: Delete report file
-      if: steps.build-report.outputs.report != ''
-      shell: bash
-      run: |
-        rm -rf ${{ steps.build-report.outputs.report }}
