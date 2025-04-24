@@ -147,6 +147,7 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-path: ${{ steps.build-report.outputs.report }}
+        append-separator: none
 
     - name: Convert to SARIF
       # Convert the JSON report into SARIF format for advanced reporting and analysis
