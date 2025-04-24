@@ -129,7 +129,7 @@ runs:
       env:
         REPORT_FILE: "report.txt"
       run: |
-        echo "**Scan Type:** ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
+        echo "**Trivy Scan Type:** ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
         TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
         echo "**Target:** $TARGET" >> ${{ env.REPORT_FILE }}
         echo "**Report Artifact Name:** ${{ steps.derive-report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy" >> ${{ env.REPORT_FILE }}
@@ -141,13 +141,21 @@ runs:
         echo "</details>" >> ${{ env.REPORT_FILE }}
         echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
 
+    - name: Find Comment
+      uses: peter-evans/find-comment@v3
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: Trivy Scan Type
+
     - name: Post Scan Results to GitHub PR
       if: github.event_name == 'pull_request' && inputs.pr-comment && (steps.build-report.outputs.report != '')
       uses: peter-evans/create-or-update-comment@v4
       with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
         body-path: ${{ steps.build-report.outputs.report }}
-
+        
     - name: Convert to SARIF
       # Convert the JSON report into SARIF format for advanced reporting and analysis
       id: convert-sarif
