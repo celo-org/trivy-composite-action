@@ -21,6 +21,8 @@ inputs:
   severity:
     default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     type: string
+  tf-vars:
+    type: string
   pr-comment:
     default: true
     type: boolean
@@ -95,6 +97,7 @@ runs:
         output: ${{ steps.derive-report-name.outputs.report_filename }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
         skip-setup-trivy: ${{ inputs.skip-setup }}
+        tf-vars: ${{ inputs.tf-vars }}
 
 
     - name: Upload JSON Report
