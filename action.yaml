@@ -28,7 +28,7 @@ inputs:
     type: boolean
   skip-dirs:
     type: string
-  trivy-skip-setup:
+  skip-setup-trivy:
     default: false
     type: boolean
 
@@ -96,7 +96,7 @@ runs:
         format: json
         output: ${{ steps.derive-report-name.outputs.report_filename }}.json
         skip-dirs: ${{ inputs.skip-dirs }}
-        skip-setup-trivy: ${{ inputs.skip-setup }}
+        skip-setup-trivy: ${{ inputs.skip-setup-trivy }}
         tf-vars: ${{ inputs.tf-vars }}
 
 
