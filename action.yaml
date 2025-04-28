@@ -28,7 +28,7 @@ inputs:
     type: boolean
   skip-dirs:
     type: string
-  skip-setup:
+  trivy-skip-setup:
     default: false
     type: boolean
 
