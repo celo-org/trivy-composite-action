@@ -98,6 +98,7 @@ runs:
         skip-dirs: ${{ inputs.skip-dirs }}
         skip-setup-trivy: ${{ inputs.skip-setup-trivy }}
         tf-vars: ${{ inputs.tf-vars }}
+        cache: false
 
 
     - name: Upload JSON Report
