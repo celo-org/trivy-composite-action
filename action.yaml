@@ -85,6 +85,8 @@ runs:
 
     - name: Run Trivy Scan
       id: trivy
+      env:
+        TRIVY_CACHE_DIR: "/runner/.local/bin/trivy-bin"
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: ${{ inputs.scan-type }}
