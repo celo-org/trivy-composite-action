@@ -1,60 +1,176 @@
 name: Trivy
 description: "Run a Trivy Scan and upload the results"
-inputs:
-  image-ref:
-    description: "image to scan"
-    required: true
-  timeout:
-    description: "how long to scan"
-    default: 15m
-  vuln-type:
-    description: "types of vulnerabilities to report"
-    default: "os,library"
-  severity:
-    description: "severity of issues to report"
-    default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
-  format:
-    description: "format of scan report"
-    default: "sarif"
-  output-file:
-    description: "file to export scan results" 
-    default: "trivy-results.sarif"
 
+inputs:
+  scan-type:
+    description: "Type of scan: image or filesystem."
+    required: true
+    type: string
+  image-ref:
+    description: Image to scan (required if scan-type is "image").
+    type: string
+  scan-ref:
+    description: Path to scan (required if scan-type is "fs").
+    type: string
+  timeout:
+    default: 15m
+    type: string
+  vuln-type:
+    default: "os,library"
+    type: string
+  severity:
+    default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    type: string
+  tf-vars:
+    type: string
+  pr-comment:
+    default: true
+    type: boolean
+  skip-dirs:
+    type: string
+  skip-setup-trivy:
+    default: false
+    type: boolean
+
+outputs:
+  text-report:
+    description: "text report of trivy scan"
+    value: ${{ steps.build-report.outputs.report }}
+  sarif-file:
+    description: "sarif report from trivy scan"
+    value: ${{ steps.convert-sarif.outputs.sarif }} 
 runs:
   using: "composite"
   steps:
-    - name: Check if GHAS is enabled
-      uses: actions/github-script@v7
-      id: ghas-enabled
-      with:
-        script: |
-          const response = await github.rest.repos.get({
-            owner: '${{ github.repository }}'.split("/")[0],
-            repo: '${{ github.repository }}'.split("/")[1]
-          });
-          const private = response.data.private
-          
-          if (private) {
-            const securityEnabled = response.data.security_and_analysis?.advanced_security?.status === 'enabled';
- 
-            if (!securityEnabled) {
-              const message = 'GitHub Advanced Security is NOT enabled and repo is private. Can not upload report';
-              core.setFailed(message);
-            }
-          }
-    - name: Run Trivy vulnerability scanner
-      id: scan
+
+    - name: Validate Required Inputs
+      shell: bash
+      run: |
+        # If scan-type is "image", image-ref must be provided
+        if [[ "${{ inputs.scan-type }}" == "image" && -z "${{ inputs.image-ref }}" ]]; then
+          echo "::error::Invalid input: scan-type is set to 'image', but 'image-ref' is not provided. Please specify the image reference."
+          exit 1
+        # If scan-type is "fs" (filesystem), scan-ref must be provided
+        elif [[ "${{ inputs.scan-type }}" == "fs" && -z "${{ inputs.scan-ref }}" ]]; then
+          echo "::error::Invalid input: scan-type is set to 'fs', but 'scan-ref' is not provided. Please specify the file system path to scan."
+          exit 1
+        # If scan-type is neither "image" nor "fs", it is invalid
+        elif [[ "${{ inputs.scan-type }}" != "image" && "${{ inputs.scan-type }}" != "fs" ]]; then
+          echo "::error::Invalid input: scan-type must be either 'image' or 'fs'. Please provide a valid scan-type."
+          exit 1
+        fi
+
+    - name: Derive Report Name
+      # Generate a unique and descriptive report file name based on the scan type and target
+      id: derive-report-name
+      env:
+        IMAGE_REFERENCE: ${{ inputs.image-ref }}
+        FILESYSTEM_REFERENCE: ${{ inputs.scan-ref }}
+      shell: bash
+      run: |
+        if [ -n "$IMAGE_REFERENCE" ]; then
+          # Extract the base name and tag from the image reference
+          image_basename="$(basename $IMAGE_REFERENCE)"
+          report_filename="${image_basename%:*}-${image_basename##*:}-${{ github.run_id }}"
+        else 
+          echo "Filesystem reference is $FILESYSTEM_REFERENCE"
+          if [ "$FILESYSTEM_REFERENCE" == "." ]; then
+            FILESYSTEM_REFERENCE=$(pwd)
+          fi
+          # Extract the base name from the filesystem reference
+          fs_basename="$(basename $FILESYSTEM_REFERENCE)"
+          report_filename="${fs_basename}-${{ github.run_id }}"
+        fi
+        echo "report_filename=$report_filename" >> $GITHUB_OUTPUT
+
+    - name: Run Trivy Scan
+      id: trivy
       uses: aquasecurity/trivy-action@master
-      with:         
-        image-ref: "${{ inputs.image-ref }}"
-        timeout: "${{ inputs.timeout }}"
-        vuln-type: "${{ inputs.vuln-type }}"
-        severity: "${{ inputs.severity }}"
-        format: "${{ inputs.format }}"
-        output: "${{ inputs.output-file }}"
-    
-    - name: Upload Trivy scan results to GitHub Security tab
-      id: upload
-      uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: "${{ inputs.output-file }}"
+        scan-type: ${{ inputs.scan-type }}
+        image-ref: ${{ inputs.image-ref }}
+        scan-ref: ${{ inputs.scan-ref }}
+        timeout: ${{ inputs.timeout }}
+        vuln-type: ${{ inputs.vuln-type }}
+        severity: ${{ inputs.severity }}
+        format: json
+        output: ${{ steps.derive-report-name.outputs.report_filename }}.json
+        skip-dirs: ${{ inputs.skip-dirs }}
+        skip-setup-trivy: ${{ inputs.skip-setup-trivy }}
+        tf-vars: ${{ inputs.tf-vars }}
+        cache: false
+
+
+    - name: Upload JSON Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.derive-report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy
+        path: ${{ steps.derive-report-name.outputs.report_filename  }}.json
+
+    - name: Convert Report to Text
+      # Convert the JSON report into a text format for easier readability
+      if: ${{ inputs.pr-comment }}
+      id: convert-text
+      env:
+        TEXT_REPORT_FILE: ${{ steps.derive-report-name.outputs.report_filename }}.txt
+        JSON_REPORT_FILE: ${{ steps.derive-report-name.outputs.report_filename }}.json
+      shell: bash
+      run: |
+        # Convert the JSON report to a text table using Trivy
+        trivy convert --format table --output "${{ env.TEXT_REPORT_FILE }}" "${{ env.JSON_REPORT_FILE }}"
+        
+        # Check if the text file was successfully created and has content
+        if [ "$(stat -c%s "${{ env.TEXT_REPORT_FILE }}")" -eq 0 ]; then
+          echo "text="
+        else
+          echo "text=${{ env.TEXT_REPORT_FILE }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build Report for PR and Summary
+      if: steps.convert-text.outputs.text != ''
+      id: build-report
+      shell: bash
+      env:
+        REPORT_FILE: "${{  inputs.scan-type  }}-report.txt"
+      run: |
+        echo "**Scan Type:** ${{ inputs.scan-type }}" >> ${{ env.REPORT_FILE }}
+        TARGET="${{ inputs.image-ref || inputs.scan-ref }}"
+        echo "**Target:** $TARGET" >> ${{ env.REPORT_FILE }}
+        echo "**Report Artifact Name:** ${{ steps.derive-report-name.outputs.report_filename }}-${{ inputs.scan-type }}-trivy" >> ${{ env.REPORT_FILE }}
+        echo "<details><summary>Click to expand</summary>" >> ${{ env.REPORT_FILE }}
+        echo "" >> ${{ env.REPORT_FILE }}
+        echo '```' >> ${{ env.REPORT_FILE }}
+        cat ${{ steps.convert-text.outputs.text }} >> ${{ env.REPORT_FILE }}
+        echo '```' >> ${{ env.REPORT_FILE }}
+        echo "</details>" >> ${{ env.REPORT_FILE }}
+        echo "report=${{ env.REPORT_FILE }}" >> $GITHUB_OUTPUT
+
+    - name: Post Scan Results to GitHub PR
+      if: github.event_name == 'pull_request' && inputs.pr-comment && (steps.build-report.outputs.report != '')
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-path: ${{ steps.build-report.outputs.report }}
+        
+    - name: Convert to SARIF
+      # Convert the JSON report into SARIF format for advanced reporting and analysis
+      id: convert-sarif
+      shell: bash
+      run: |
+        # Convert the JSON report to SARIF format using Trivy
+        trivy convert --format sarif --output "${{ steps.derive-report-name.outputs.report_filename }}.sarif" "${{ steps.derive-report-name.outputs.report_filename }}.json"
+
+        # Check if the SARIF file was successfully created
+        if [ ! -f "${{ steps.derive-report-name.outputs.report_filename }}.sarif" ]; then
+          echo "::error::Failed to create the SARIF report file."
+          exit 1
+        fi
+
+        # Validate that the SARIF file is not empty
+        if [ "$(stat -c%s "${{ steps.derive-report-name.outputs.report_filename }}.sarif")" -eq 0 ]; then
+          echo "::error::The SARIF report file is empty."
+          exit 1
+        fi
+
+        # Set the SARIF file output
+        echo "sarif=${{ steps.derive-report-name.outputs.report_filename }}.sarif" >> $GITHUB_OUTPUT
