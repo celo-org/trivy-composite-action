@@ -81,6 +81,8 @@ runs:
           fs_basename="$(basename $FILESYSTEM_REFERENCE)"
           report_filename="${fs_basename}-${{ github.run_id }}"
         fi
+        report_filename="${report_filename}-$(openssl rand -hex 3)"
+
         echo "report_filename=$report_filename" >> $GITHUB_OUTPUT
 
     - name: Run Trivy Scan
